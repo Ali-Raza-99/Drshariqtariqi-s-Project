@@ -11,7 +11,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import StarIcon from "@mui/icons-material/Star";
-import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import { useAuth } from "../context/AuthContext";
+import LoginFirstDialog from "./auth/LoginFirstDialog";
+import AddToCartButton from "./cart/AddToCartButton";
 
 export default function ProductCard({
   image,
@@ -20,10 +22,21 @@ export default function ProductCard({
   onAddToCart,
   onBuyNow,
 }) {
+  const { currentUser } = useAuth();
   const [qty, setQty] = useState(1);
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
 
-  const increaseQty = () => setQty((q) => q + 1);
-  const decreaseQty = () => setQty((q) => (q > 1 ? q - 1 : q));
+  const requireLoginOr = (fn) => {
+    if (!currentUser) {
+      setLoginPromptOpen(true);
+      return;
+    }
+    fn?.();
+  };
+
+  const increaseQty = () => requireLoginOr(() => setQty((q) => q + 1));
+  const decreaseQty = () =>
+    requireLoginOr(() => setQty((q) => (q > 1 ? q - 1 : q)));
 
   return (
     <Card
@@ -132,7 +145,7 @@ export default function ProductCard({
       <Stack direction="row" spacing={1} mt={1.5}>
         <Button
           fullWidth
-          onClick={() => onBuyNow?.({ name, price, qty })}
+          onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty }))}
           sx={{
             bgcolor: "white",
             color: "black",
@@ -146,18 +159,24 @@ export default function ProductCard({
           Buy Now
         </Button>
 
-        <IconButton
-          onClick={() => onAddToCart?.({ name, price, qty })}
+        <AddToCartButton
+          onAddToCart={() => onAddToCart?.({ name, price, qty })}
+          payload={undefined}
           sx={{
             bgcolor: "white",
             color: "black",
             borderRadius: 2,
           }}
-          aria-label="Add to cart"
-        >
-          <ShoppingCartOutlinedIcon />
-        </IconButton>
+          ariaLabel="Add to cart"
+        />
       </Stack>
+
+      <LoginFirstDialog
+        open={loginPromptOpen}
+        onClose={() => setLoginPromptOpen(false)}
+        title="Login first"
+        description="Please login first for orders and to use the cart."
+      />
     </Card>
   );
 }

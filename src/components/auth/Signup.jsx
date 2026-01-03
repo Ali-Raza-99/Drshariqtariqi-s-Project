@@ -550,6 +550,19 @@ export default function Signup() {
 										Login
 									</Link>
 								</Typography>
+								<Typography
+									variant="body2"
+									sx={{ mt: 1, textAlign: "center", color: "rgba(255, 255, 255, 0.75)" }}
+								>
+									<Link
+										component={RouterLink}
+										to="/"
+										underline="hover"
+										sx={{ color: "inherit", fontWeight: 700 }}
+									>
+										Back to Home
+									</Link>
+								</Typography>
 							</Grid>
 						</Grid>
 					</Box>

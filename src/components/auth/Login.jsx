@@ -238,6 +238,28 @@ const Login = () => {
             Sign up
           </Box>
         </Typography>
+
+        <Typography
+          align="center"
+          variant="body2"
+          color="#fff"
+          fontSize={12.5}
+          sx={{ mt: 1, opacity: 0.75 }}
+        >
+          <Box
+            component={RouterLink}
+            to="/"
+            sx={{
+              color: "#fff",
+              cursor: "pointer",
+              textDecoration: "none",
+              display: "inline",
+              fontWeight: 700,
+            }}
+          >
+            Back to Home
+          </Box>
+        </Typography>
       </Box>
     </Box>
   );
