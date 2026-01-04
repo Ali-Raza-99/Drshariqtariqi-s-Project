@@ -39,6 +39,7 @@ import logoImg from "../assets/logo.jpeg";
 import ProductCard from "./ProductCard";
 import AdminProductCard from "./admin/AdminProductCard";
 import { useAuth } from "../context/AuthContext";
+import { getNavTo, isNavItemActive, navItems } from "./layout/navConfig";
 import {
   createProduct,
   deleteProduct,
@@ -47,23 +48,10 @@ import {
   updateProduct,
 } from "../firebase/firestore";
 import { uploadToCloudinaryUnsigned } from "../utils/cloudinaryUpload";
-import LoginFirstDialog from "./auth/LoginFirstDialog";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
-
-const navItems = [
-  "Home",
-  "Courses",
-  "Library",
-  "Product",
-  "Ijtemai Qurbani",
-  "Mureed Counter",
-  "Ilm‑ul‑Adadad Calculator",
-  "Istikhara",
-  "Appointment",
-];
 
 export default function Products() {
   const { currentUser, authLoading, logout } = useAuth();
@@ -85,7 +73,6 @@ export default function Products() {
   );
 
   const [cartOpen, setCartOpen] = useState(false);
-  const [loginFirstOpen, setLoginFirstOpen] = useState(false);
   const [cartQty, setCartQty] = useState(() => ({ oil: 0, bakhor: 0, powder: 0 }));
   const totalItems = cartProducts.reduce((sum, p) => sum + (cartQty[p.id] ?? 0), 0);
   const totalAmount = cartProducts.reduce(
@@ -420,45 +407,36 @@ export default function Products() {
                 gap: 1,
               }}
             >
-              {navItems.map((item) => (
-                (() => {
-                  const to =
-                    item === "Home" ? "/" : item === "Product" ? "/products" : undefined;
-                  const isActive =
-                    (item === "Home" && location.pathname === "/") ||
-                    (item === "Product" && location.pathname.startsWith("/products"));
+              {navItems.map((item) => {
+                const to = getNavTo(item);
+                const isActive = isNavItemActive(item, location.pathname);
 
-                  return (
-                <Button
-                  key={item}
-                  component={
-                    item === "Home" || item === "Product" ? RouterLink : "button"
-                  }
-                  to={
-                    to
-                  }
-                  sx={{
-                    color: "white",
-                    fontWeight: 600,
-                    textTransform: "none",
-                    borderRadius: 2,
-                    px: 1.25,
-                    ...(isActive
-                      ? {
-                          backgroundColor: "rgba(255,255,255,0.08)",
-                          borderBottom: "2px solid rgba(255,255,255,0.9)",
-                        }
-                      : null),
-                    "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.08)",
-                    },
-                  }}
-                >
-                  {item}
-                </Button>
-                  );
-                })()
-              ))}
+                return (
+                  <Button
+                    key={item}
+                    component={RouterLink}
+                    to={to}
+                    sx={{
+                      color: "white",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 2,
+                      px: 1.25,
+                      ...(isActive
+                        ? {
+                            backgroundColor: "rgba(255,255,255,0.08)",
+                            borderBottom: "2px solid rgba(255,255,255,0.9)",
+                          }
+                        : null),
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.08)",
+                      },
+                    }}
+                  >
+                    {item}
+                  </Button>
+                );
+              })}
             </Box>
 
             <IconButton
@@ -475,38 +453,6 @@ export default function Products() {
               <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
                 {!currentUser ? (
                   <>
-                    <IconButton
-                      onClick={() => setLoginFirstOpen(true)}
-                      sx={{
-                        color: "white",
-                        mr: 1,
-                        borderRadius: 3,
-                        border: "1px solid rgba(255,255,255,0.18)",
-                        backgroundColor: "rgba(255,255,255,0.06)",
-                        backdropFilter: "blur(8px)",
-                        transition: "transform 180ms ease, background-color 220ms ease",
-                        "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.10)",
-                          transform: "translateY(-1px)",
-                        },
-                        "&:active": { transform: "translateY(0px) scale(0.98)" },
-                      }}
-                      aria-label="Open cart"
-                    >
-                      <Badge
-                        badgeContent={totalItems}
-                        color="error"
-                        overlap="circular"
-                        sx={{
-                          "& .MuiBadge-badge": {
-                            border: "1px solid rgba(0,0,0,0.35)",
-                          },
-                        }}
-                      >
-                        <ShoppingCartOutlinedIcon />
-                      </Badge>
-                    </IconButton>
-
                     <Button
                       component={RouterLink}
                       to="/login"
@@ -540,216 +486,10 @@ export default function Products() {
                     >
                       Login
                     </Button>
-
-                    <Dialog
-                      open={cartOpen}
-                      onClose={() => setCartOpen(false)}
-                      fullWidth
-                      maxWidth="sm"
-                      TransitionComponent={CartTransition}
-                      transitionDuration={{ enter: 260, exit: 220 }}
-                      PaperProps={{
-                        sx: {
-                          bgcolor: "rgba(15, 15, 15, 0.92)",
-                          border: "1px solid rgba(255, 255, 255, 0.14)",
-                          borderRadius: 3,
-                          boxShadow: "0 20px 70px rgba(0,0,0,0.65)",
-                          backdropFilter: "blur(14px)",
-                          color: "#fff",
-                          overflow: "hidden",
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          px: 2.25,
-                          py: 1.75,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: 1,
-                        }}
-                      >
-                        <Box>
-                          <Typography variant="h6" fontWeight={800} sx={{ lineHeight: 1.1 }}>
-                            Your Cart
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ opacity: 0.7, fontSize: 13, mt: 0.25 }}
-                          >
-                            {totalItems > 0
-                              ? `${totalItems} item${totalItems === 1 ? "" : "s"} selected`
-                              : "No items selected yet"}
-                          </Typography>
-                        </Box>
-
-                        <IconButton
-                          onClick={() => setCartOpen(false)}
-                          sx={{ color: "rgba(255,255,255,0.85)" }}
-                          aria-label="Close cart"
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Box>
-
-                      <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
-
-                      <Box sx={{ px: 2.25, py: 2 }}>
-                        <Stack spacing={1.5}>
-                          {cartProducts.map((p) => {
-                            const qty = cartQty[p.id] ?? 0;
-                            const lineTotal = qty * p.price;
-                            return (
-                              <Box
-                                key={p.id}
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1.25,
-                                  p: 1.25,
-                                  borderRadius: 2,
-                                  border: "1px solid rgba(255,255,255,0.12)",
-                                  bgcolor: "rgba(255,255,255,0.04)",
-                                }}
-                              >
-                                <Box
-                                  component="img"
-                                  src={p.image}
-                                  alt={p.name}
-                                  sx={{
-                                    width: 54,
-                                    height: 54,
-                                    borderRadius: 2,
-                                    objectFit: "cover",
-                                    border: "1px solid rgba(255,255,255,0.10)",
-                                  }}
-                                />
-
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                  <Typography fontWeight={800} sx={{ lineHeight: 1.15 }}>
-                                    {p.name}
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ opacity: 0.7, fontSize: 13, mt: 0.25 }}>
-                                    Rs. {p.price}
-                                  </Typography>
-                                </Box>
-
-                                <Stack direction="row" spacing={0.75} alignItems="center">
-                                  <IconButton
-                                    onClick={() => decCart(p.id)}
-                                    sx={{
-                                      color: "#fff",
-                                      border: "1px solid rgba(255,255,255,0.24)",
-                                      bgcolor: "transparent",
-                                      "&:hover": { bgcolor: "rgba(255,255,255,0.08)" },
-                                    }}
-                                    size="small"
-                                    aria-label={`Decrease ${p.name}`}
-                                  >
-                                    <RemoveIcon fontSize="small" />
-                                  </IconButton>
-
-                                  <Box
-                                    sx={{
-                                      minWidth: 36,
-                                      textAlign: "center",
-                                      py: 0.6,
-                                      borderRadius: 1.5,
-                                      border: "1px solid rgba(255,255,255,0.18)",
-                                      bgcolor: "rgba(0,0,0,0.25)",
-                                    }}
-                                  >
-                                    <Typography fontWeight={900} fontSize={13}>
-                                      {qty}
-                                    </Typography>
-                                  </Box>
-
-                                  <IconButton
-                                    onClick={() => incCart(p.id)}
-                                    sx={{
-                                      color: "#fff",
-                                      border: "1px solid rgba(255,255,255,0.24)",
-                                      bgcolor: "transparent",
-                                      "&:hover": { bgcolor: "rgba(255,255,255,0.08)" },
-                                    }}
-                                    size="small"
-                                    aria-label={`Increase ${p.name}`}
-                                  >
-                                    <AddIcon fontSize="small" />
-                                  </IconButton>
-                                </Stack>
-
-                                <Box sx={{ width: 92, textAlign: "right" }}>
-                                  <Typography fontWeight={900} sx={{ lineHeight: 1.15 }}>
-                                    Rs. {lineTotal}
-                                  </Typography>
-                                  <Typography variant="caption" sx={{ opacity: 0.65 }}>
-                                    Subtotal
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            );
-                          })}
-                        </Stack>
-
-                        <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.12)" }} />
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            justifyContent: "space-between",
-                            gap: 2,
-                          }}
-                        >
-                          <Box sx={{ flex: 1 }}>
-                            <Typography fontWeight={900} sx={{ mb: 0.75 }}>
-                              Order Summary
-                            </Typography>
-                            {totalItems === 0 ? (
-                              <Typography variant="body2" sx={{ opacity: 0.7, fontSize: 13 }}>
-                                Add items using + to see summary.
-                              </Typography>
-                            ) : (
-                              <Stack spacing={0.4}>
-                                {cartProducts
-                                  .filter((p) => (cartQty[p.id] ?? 0) > 0)
-                                  .map((p) => (
-                                    <Typography
-                                      key={`summary-${p.id}`}
-                                      variant="body2"
-                                      sx={{ opacity: 0.85, fontSize: 13 }}
-                                    >
-                                      {p.name} × {cartQty[p.id]} = Rs. {(cartQty[p.id] ?? 0) * p.price}
-                                    </Typography>
-                                  ))}
-                              </Stack>
-                            )}
-                          </Box>
-
-                          <Box sx={{ textAlign: "right" }}>
-                            <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                              Total
-                            </Typography>
-                            <Typography variant="h6" fontWeight={1000} sx={{ lineHeight: 1.1 }}>
-                              Rs. {totalAmount}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                    </Dialog>
-
-                    <LoginFirstDialog
-                      open={loginFirstOpen}
-                      onClose={() => setLoginFirstOpen(false)}
-                      title="Login first"
-                      description="Please login first for orders and to use the cart."
-                    />
                   </>
                 ) : (
                   <>
-                    {!isAdmin && (
+                    {adminChecked && !isAdmin && (
                       <IconButton
                         onClick={() => setCartOpen(true)}
                         sx={{
@@ -808,7 +548,7 @@ export default function Products() {
                       </MenuItem>
                     </Menu>
 
-                    {!isAdmin && (
+                    {adminChecked && !isAdmin && (
                       <Dialog
                         open={cartOpen}
                         onClose={() => setCartOpen(false)}
@@ -898,7 +638,10 @@ export default function Products() {
                                   <Typography fontWeight={800} sx={{ lineHeight: 1.15 }}>
                                     {p.name}
                                   </Typography>
-                                  <Typography variant="body2" sx={{ opacity: 0.7, fontSize: 13, mt: 0.25 }}>
+                                  <Typography
+                                    variant="body2"
+                                    sx={{ opacity: 0.7, fontSize: 13, mt: 0.25 }}
+                                  >
                                     Rs. {p.price}
                                   </Typography>
                                 </Box>
