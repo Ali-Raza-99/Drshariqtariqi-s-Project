@@ -25,46 +25,19 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
-import logoImg from "../../assets/logo.jpeg";
+import logoImg from "../../assets/mainlogo.png";
 import oilImg from "../../assets/oil.jpeg";
 import bakhorImg from "../../assets/bakhor.jpeg";
 import powderImg from "../../assets/powder.jpeg";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile } from "../../firebase/firestore";
+import { getNavItems, getNavTo, isNavItemActive } from "./navConfig";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const navItems = [
-	"Home",
-	"Courses",
-	"Library",
-	"Product",
-	"Ijtemai Qurbani",
-	"Mureed Counter",
-	"Ilm‑ul‑Adadad Calculator",
-	"Istikhara",
-	"Appointment",
-];
-
-const routeByItem = {
-	Home: "/",
-	Courses: "/courses",
-	Library: "/library",
-	Product: "/products",
-	"Ijtemai Qurbani": "/ijtemai-qurbani",
-	"Mureed Counter": "/mureed-counter",
-	"Ilm‑ul‑Adadad Calculator": "/ilm-ul-adadad-calculator",
-	Istikhara: "/istikhara",
-	Appointment: "/appointment",
-};
-
-const isRouteActive = (pathname, route) => {
-	if (!route) return false;
-	if (route === "/") return pathname === "/";
-	return pathname.startsWith(route);
-};
+// Navbar config is shared via navConfig (supports admin labels)
 
 export default function SitePage({ children, maxWidth = "md" }) {
 	const { currentUser, authLoading, logout } = useAuth();
@@ -195,9 +168,9 @@ export default function SitePage({ children, maxWidth = "md" }) {
 								gap: 1,
 							}}
 						>
-							{navItems.map((item) => {
-								const to = routeByItem[item];
-								const isActive = isRouteActive(location.pathname, to);
+							{getNavItems(isAdmin).map((item) => {
+								const to = getNavTo(item);
+								const isActive = isNavItemActive(item, location.pathname);
 
 								return (
 									<Button

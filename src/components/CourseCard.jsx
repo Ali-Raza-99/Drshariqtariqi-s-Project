@@ -1,43 +1,19 @@
-import { useState } from "react";
 import {
   Box,
   Card,
   CardMedia,
   Typography,
-  IconButton,
   Button,
   Stack,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import StarIcon from "@mui/icons-material/Star";
-import { useAuth } from "../context/AuthContext";
-import LoginFirstDialog from "./auth/LoginFirstDialog";
-import AddToCartButton from "./cart/AddToCartButton";
 
-export default function ProductCard({
+export default function CourseCard({
   image,
   name,
   price,
-  onAddToCart,
-  onBuyNow,
+  onViewDetails,
 }) {
-  const { currentUser } = useAuth();
-  const [qty, setQty] = useState(1);
-  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
-
-  const requireLoginOr = (fn) => {
-    if (!currentUser) {
-      setLoginPromptOpen(true);
-      return;
-    }
-    fn?.();
-  };
-
-  const increaseQty = () => requireLoginOr(() => setQty((q) => q + 1));
-  const decreaseQty = () =>
-    requireLoginOr(() => setQty((q) => (q > 1 ? q - 1 : q)));
-
   return (
     <Card
       sx={{
@@ -133,56 +109,15 @@ export default function ProductCard({
         Rs. {price}
       </Typography>
 
-      {/* QUANTITY */}
-      <Stack direction="row" alignItems="center" spacing={1} mt={1.5}>
-        <IconButton
-          onClick={decreaseQty}
-          disableRipple
-          sx={{
-            color: "white",
-            border: "1px solid rgba(255,255,255,0.35)",
-            bgcolor: "transparent",
-            "&:hover": { bgcolor: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.65)" },
-          }}
-        >
-          <RemoveIcon />
-        </IconButton>
+      {/* SPACER - Same height as quantity controls in ProductCard */}
+      <Box sx={{ height: 42, mt: 1.5 }} />
 
-        <Box
-          sx={{
-            minWidth: 48,
-            textAlign: "center",
-            py: 0.75,
-            borderRadius: 2,
-            border: "1px solid rgba(255,255,255,0.22)",
-            bgcolor: "rgba(255,255,255,0.04)",
-          }}
-        >
-          <Typography fontWeight={800} fontSize={14}>
-            {qty}
-          </Typography>
-        </Box>
-
-        <IconButton
-          onClick={increaseQty}
-          disableRipple
-          sx={{
-            color: "white",
-            border: "1px solid rgba(255,255,255,0.35)",
-            bgcolor: "transparent",
-            "&:hover": { bgcolor: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.65)" },
-          }}
-        >
-          <AddIcon />
-        </IconButton>
-      </Stack>
-
-      {/* ACTION BUTTONS */}
+      {/* ACTION BUTTON */}
       <Stack direction="row" spacing={1} mt={1.5}>
         <Button
           fullWidth
           disableRipple
-          onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty }))}
+          onClick={onViewDetails}
           sx={{
             bgcolor: "white",
             color: "black",
@@ -193,27 +128,9 @@ export default function ProductCard({
             "&:hover": { bgcolor: "#eee" },
           }}
         >
-          Buy Now
+          View Details
         </Button>
-
-        <AddToCartButton
-          onAddToCart={() => onAddToCart?.({ name, price, qty })}
-          payload={undefined}
-          sx={{
-            bgcolor: "white",
-            color: "black",
-            borderRadius: 2,
-          }}
-          ariaLabel="Add to cart"
-        />
       </Stack>
-
-      <LoginFirstDialog
-        open={loginPromptOpen}
-        onClose={() => setLoginPromptOpen(false)}
-        title="Login first"
-        description="Please login first for orders and to use the cart."
-      />
     </Card>
   );
 }

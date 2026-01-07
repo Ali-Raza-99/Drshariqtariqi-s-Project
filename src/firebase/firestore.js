@@ -78,3 +78,104 @@ export const deleteProduct = async (id) => {
 	const ref = doc(db, "products", id);
 	await deleteDoc(ref);
 };
+
+// ------------------------------
+// Courses
+// ------------------------------
+
+export const listCourses = async () => {
+	const ref = collection(db, "courses");
+	const q = query(ref, orderBy("createdAt", "desc"));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const createCourse = async ({ data }) => {
+	const ref = collection(db, "courses");
+	const docRef = await addDoc(ref, {
+		...data,
+		createdAt: serverTimestamp(),
+		updatedAt: serverTimestamp(),
+	});
+	return docRef;
+};
+
+export const updateCourse = async ({ id, data }) => {
+	const ref = doc(db, "courses", id);
+	await updateDoc(ref, {
+		...data,
+		updatedAt: serverTimestamp(),
+	});
+	return ref;
+};
+
+export const deleteCourse = async (id) => {
+	const ref = doc(db, "courses", id);
+	await deleteDoc(ref);
+};
+
+// ------------------------------
+// Ijtimai Qurbani Config
+// ------------------------------
+
+export const listQurbaniAnimals = async () => {
+	const ref = collection(db, "qurbaniAnimals");
+	const q = query(ref, orderBy("createdAt", "desc"));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const createQurbaniAnimal = async ({ data }) => {
+	const ref = collection(db, "qurbaniAnimals");
+	const docRef = await addDoc(ref, {
+		...data,
+		createdAt: serverTimestamp(),
+		updatedAt: serverTimestamp(),
+	});
+	return docRef;
+};
+
+export const updateQurbaniAnimal = async ({ id, data }) => {
+	const ref = doc(db, "qurbaniAnimals", id);
+	await updateDoc(ref, {
+		...data,
+		updatedAt: serverTimestamp(),
+	});
+	return ref;
+};
+
+export const deleteQurbaniAnimal = async (id) => {
+	const ref = doc(db, "qurbaniAnimals", id);
+	await deleteDoc(ref);
+};
+
+export const listQurbaniBanks = async () => {
+	const ref = collection(db, "qurbaniBanks");
+	const q = query(ref, orderBy("createdAt", "desc"));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const createQurbaniBank = async ({ data }) => {
+	const ref = collection(db, "qurbaniBanks");
+	const docRef = await addDoc(ref, {
+		...data,
+		createdAt: serverTimestamp(),
+		updatedAt: serverTimestamp(),
+	});
+	return docRef;
+};
+
+export const updateQurbaniBank = async ({ id, data }) => {
+	const ref = doc(db, "qurbaniBanks", id);
+	await updateDoc(ref, {
+		...data,
+		updatedAt: serverTimestamp(),
+	});
+	return ref;
+};
+
+export const deleteQurbaniBank = async (id) => {
+	const ref = doc(db, "qurbaniBanks", id);
+	await deleteDoc(ref);
+};

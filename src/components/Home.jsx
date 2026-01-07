@@ -31,13 +31,13 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 import amliyatImg from "../assets/amliyat.jpg";
 import slide1Img from "../assets/1.png";
 import slide2Img from "../assets/2.png";
-import logoImg from "../assets/logo.jpeg";
+import logoImg from "../assets/mainlogo.png";
 import oilImg from "../assets/oil.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
 import powderImg from "../assets/powder.jpeg";
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile } from "../firebase/firestore";
-import { getNavTo, isNavItemActive, navItems } from "./layout/navConfig";
+import { getNavItems, getNavTo, isNavItemActive } from "./layout/navConfig";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -209,7 +209,7 @@ export default function HomePage() {
                 gap: 1,
               }}
             >
-              {navItems.map((item) => {
+              {getNavItems(isAdmin).map((item) => {
                 const to = getNavTo(item);
                 const isActive = isNavItemActive(item, location.pathname);
 

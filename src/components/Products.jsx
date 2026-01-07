@@ -14,8 +14,6 @@ import {
   Menu,
   MenuItem,
   Slide,
-  Stack,
-  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -35,19 +33,14 @@ import oilImg from "../assets/oil.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
 import powderImg from "../assets/powder.jpeg";
 import bgImg from "../assets/5.png";
-import logoImg from "../assets/logo.jpeg";
+import logoImg from "../assets/mainlogo.png";
 import ProductCard from "./ProductCard";
-import AdminProductCard from "./admin/AdminProductCard";
 import { useAuth } from "../context/AuthContext";
-import { getNavTo, isNavItemActive, navItems } from "./layout/navConfig";
+import { getNavTo, isNavItemActive, getNavItems } from "./layout/navConfig";
 import {
-  createProduct,
-  deleteProduct,
   getUserProfile,
   listProducts,
-  updateProduct,
 } from "../firebase/firestore";
-import { uploadToCloudinaryUnsigned } from "../utils/cloudinaryUpload";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -103,79 +96,15 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
-  const [adminEditingId, setAdminEditingId] = useState(null);
-  const [adminName, setAdminName] = useState("");
-  const [adminPrice, setAdminPrice] = useState("");
-  const [adminImageFile, setAdminImageFile] = useState(null);
-  const [adminImageUrl, setAdminImageUrl] = useState("");
-  const [adminSaving, setAdminSaving] = useState(false);
-  const [adminError, setAdminError] = useState("");
-
-  const isEditing = Boolean(adminEditingId);
-
-  const resetAdminForm = () => {
-    setAdminEditingId(null);
-    setAdminName("");
-    setAdminPrice("");
-    setAdminImageFile(null);
-    setAdminImageUrl("");
-    setAdminError("");
-  };
-
-  const startAdminEdit = (product) => {
-    setAdminEditingId(product.id);
-    setAdminName(String(product.name ?? ""));
-    setAdminPrice(String(product.price ?? ""));
-    setAdminImageUrl(String(product.imageUrl ?? ""));
-    setAdminImageFile(null);
-    setAdminError("");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const onPickAdminImage = (event) => {
-    const file = event.target.files?.[0] ?? null;
-    event.target.value = "";
-    setAdminImageFile(file);
-    setAdminError("");
-  };
-
-  const refreshProducts = async () => {
-    setLoadingProducts(true);
-    try {
-      const data = await listProducts();
-      if (isAdmin) {
-        setProducts(Array.isArray(data) ? data : []);
-      } else if (Array.isArray(data) && data.length > 0) {
-        setProducts(data);
-      } else {
-        setProducts(fallbackProducts);
-      }
-    } catch {
-      if (isAdmin) {
-        setProducts([]);
-      } else {
-        setProducts(fallbackProducts);
-      }
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
-
   React.useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
       if (authLoading) return;
-      if (currentUser && !adminChecked) return;
       try {
         setLoadingProducts(true);
         const data = await listProducts();
         if (cancelled) return;
-
-        if (isAdmin) {
-          setProducts(Array.isArray(data) ? data : []);
-          return;
-        }
 
         if (Array.isArray(data) && data.length > 0) {
           setProducts(data);
@@ -184,11 +113,7 @@ export default function Products() {
         }
       } catch {
         if (cancelled) return;
-        if (isAdmin) {
-          setProducts([]);
-        } else {
-          setProducts(fallbackProducts);
-        }
+        setProducts(fallbackProducts);
       } finally {
         if (!cancelled) setLoadingProducts(false);
       }
@@ -198,7 +123,7 @@ export default function Products() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, currentUser, adminChecked, isAdmin, fallbackProducts]);
+  }, [authLoading, fallbackProducts]);
 
   const productsPerView = isMdUp ? 4 : isSmUp ? 2 : 1;
   const maxStartIndex = Math.max(0, products.length - productsPerView);
@@ -283,13 +208,13 @@ export default function Products() {
           profile?.avatarUrl ??
           null;
         setProfilePicUrl(fromFirestore ?? currentUser.photoURL ?? null);
-          setIsAdmin(profile?.role === "admin");
-          setAdminChecked(true);
+        setIsAdmin(profile?.role === "admin");
+        setAdminChecked(true);
       } catch {
         if (cancelled) return;
         setProfilePicUrl(currentUser.photoURL ?? null);
-          setIsAdmin(false);
-          setAdminChecked(true);
+        setIsAdmin(false);
+        setAdminChecked(true);
       }
     };
 
@@ -298,59 +223,6 @@ export default function Products() {
       cancelled = true;
     };
   }, [currentUser?.uid, currentUser?.photoURL]);
-
-    const canAdminSubmit = useMemo(() => {
-      const parsed = Number(adminPrice);
-      if (!adminName.trim()) return false;
-      if (!Number.isFinite(parsed) || parsed <= 0) return false;
-      if (!isEditing && !adminImageFile) return false;
-      if (isEditing && !adminImageFile && !adminImageUrl) return false;
-      return true;
-    }, [adminName, adminPrice, adminImageFile, adminImageUrl, isEditing]);
-
-    const handleAdminSave = async () => {
-      setAdminError("");
-      setAdminSaving(true);
-      try {
-        let finalImageUrl = adminImageUrl;
-        if (adminImageFile) {
-          finalImageUrl = await uploadToCloudinaryUnsigned(adminImageFile);
-        }
-
-        const payload = {
-          name: adminName.trim(),
-          price: Number(adminPrice),
-          imageUrl: finalImageUrl,
-        };
-
-        if (isEditing) {
-          await updateProduct({ id: adminEditingId, data: payload });
-        } else {
-          await createProduct({ data: payload });
-        }
-
-        await refreshProducts();
-        resetAdminForm();
-      } catch (e) {
-        setAdminError(e?.message || "Failed to save product");
-      } finally {
-        setAdminSaving(false);
-      }
-    };
-
-    const handleAdminDelete = async (id) => {
-      setAdminError("");
-      setAdminSaving(true);
-      try {
-        await deleteProduct(id);
-        await refreshProducts();
-        if (adminEditingId === id) resetAdminForm();
-      } catch (e) {
-        setAdminError(e?.message || "Failed to delete product");
-      } finally {
-        setAdminSaving(false);
-      }
-    };
 
   const openProfileMenu = (event) => setProfileMenuAnchorEl(event.currentTarget);
   const closeProfileMenu = () => setProfileMenuAnchorEl(null);
@@ -407,7 +279,7 @@ export default function Products() {
                 gap: 1,
               }}
             >
-              {navItems.map((item) => {
+              {getNavItems(isAdmin).map((item) => {
                 const to = getNavTo(item);
                 const isActive = isNavItemActive(item, location.pathname);
 
@@ -489,39 +361,37 @@ export default function Products() {
                   </>
                 ) : (
                   <>
-                    {adminChecked && !isAdmin && (
-                      <IconButton
-                        onClick={() => setCartOpen(true)}
+                    <IconButton
+                      onClick={() => setCartOpen(true)}
+                      sx={{
+                        color: "white",
+                        mr: 1,
+                        borderRadius: 3,
+                        border: "1px solid rgba(255,255,255,0.18)",
+                        backgroundColor: "rgba(255,255,255,0.06)",
+                        backdropFilter: "blur(8px)",
+                        transition: "transform 180ms ease, background-color 220ms ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255,255,255,0.10)",
+                          transform: "translateY(-1px)",
+                        },
+                        "&:active": { transform: "translateY(0px) scale(0.98)" },
+                      }}
+                      aria-label="Open cart"
+                    >
+                      <Badge
+                        badgeContent={totalItems}
+                        color="error"
+                        overlap="circular"
                         sx={{
-                          color: "white",
-                          mr: 1,
-                          borderRadius: 3,
-                          border: "1px solid rgba(255,255,255,0.18)",
-                          backgroundColor: "rgba(255,255,255,0.06)",
-                          backdropFilter: "blur(8px)",
-                          transition: "transform 180ms ease, background-color 220ms ease",
-                          "&:hover": {
-                            backgroundColor: "rgba(255,255,255,0.10)",
-                            transform: "translateY(-1px)",
+                          "& .MuiBadge-badge": {
+                            border: "1px solid rgba(0,0,0,0.35)",
                           },
-                          "&:active": { transform: "translateY(0px) scale(0.98)" },
                         }}
-                        aria-label="Open cart"
                       >
-                        <Badge
-                          badgeContent={totalItems}
-                          color="error"
-                          overlap="circular"
-                          sx={{
-                            "& .MuiBadge-badge": {
-                              border: "1px solid rgba(0,0,0,0.35)",
-                            },
-                          }}
-                        >
-                          <ShoppingCartOutlinedIcon />
-                        </Badge>
-                      </IconButton>
-                    )}
+                        <ShoppingCartOutlinedIcon />
+                      </Badge>
+                    </IconButton>
 
                     <IconButton
                       onClick={openProfileMenu}
@@ -793,188 +663,19 @@ export default function Products() {
               </Grid>
             </Grid>
 
-            {isAdmin && (
-              <Box
-                sx={{
-                  mt: 3,
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  borderRadius: 4,
-                  backgroundColor: "rgba(0,0,0,0.22)",
-                  backdropFilter: "blur(8px)",
-                  p: { xs: 2, md: 2.5 },
-                }}
-              >
-                <Typography variant="h6" fontWeight={900} sx={{ mb: 1 }}>
-                  Manage products
-                </Typography>
-
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Product name"
-                      value={adminName}
-                      onChange={(e) => setAdminName(e.target.value)}
-                      size="small"
-                      InputLabelProps={{ sx: { color: "rgba(255,255,255,0.75)" } }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": { color: "#fff" },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "rgba(255,255,255,0.22)",
-                        },
-                        "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "rgba(255,255,255,0.35)",
-                        },
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      fullWidth
-                      label="Price"
-                      value={adminPrice}
-                      onChange={(e) => setAdminPrice(e.target.value)}
-                      size="small"
-                      inputMode="decimal"
-                      InputLabelProps={{ sx: { color: "rgba(255,255,255,0.75)" } }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": { color: "#fff" },
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "rgba(255,255,255,0.22)",
-                        },
-                        "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "rgba(255,255,255,0.35)",
-                        },
-                      }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} md={5}>
-                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", alignItems: "center" }}>
-                      <Button
-                        variant="outlined"
-                        component="label"
-                        disabled={adminSaving}
-                        sx={{
-                          color: "white",
-                          borderColor: "rgba(255,255,255,0.35)",
-                          textTransform: "none",
-                          borderRadius: 3,
-                        }}
-                      >
-                        {adminImageFile
-                          ? "Image selected"
-                          : isEditing
-                            ? "Change image"
-                            : "Choose image"}
-                        <input type="file" accept="image/*" hidden onChange={onPickAdminImage} />
-                      </Button>
-
-                      <Typography sx={{ opacity: 0.75, fontSize: 13 }}>
-                        {isEditing
-                          ? adminImageFile
-                            ? "New image will be uploaded"
-                            : "Keep current image"
-                          : "Image is required"}
-                      </Typography>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                      <Button
-                        variant="contained"
-                        disabled={!canAdminSubmit || adminSaving}
-                        onClick={handleAdminSave}
-                        sx={{
-                          textTransform: "none",
-                          fontWeight: 900,
-                          borderRadius: 3,
-                          bgcolor: "#fff",
-                          color: "#111",
-                          "&:hover": { bgcolor: "grey.800", color: "#fff" },
-                        }}
-                      >
-                        {isEditing ? "Save changes" : "Add product"}
-                      </Button>
-
-                      {isEditing && (
-                        <Button
-                          variant="outlined"
-                          disabled={adminSaving}
-                          onClick={resetAdminForm}
-                          sx={{
-                            textTransform: "none",
-                            borderRadius: 3,
-                            color: "white",
-                            borderColor: "rgba(255,255,255,0.35)",
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      )}
-                    </Box>
-
-                    {adminError ? (
-                      <Typography sx={{ mt: 1, color: "#ff8a8a", fontSize: 13 }}>
-                        {adminError}
-                      </Typography>
-                    ) : null}
-                  </Grid>
-                </Grid>
-              </Box>
-            )}
-
-            {isAdmin ? (
-              <Box
-                sx={{
-                  mt: 4,
-                  borderRadius: 4,
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  backgroundColor: "rgba(0,0,0,0.22)",
-                  backdropFilter: "blur(8px)",
-                  p: { xs: 2, md: 2.5 },
-                  overflow: "hidden",
-                }}
-              >
-                {loadingProducts ? (
-                  <Typography sx={{ opacity: 0.85 }}>Loading...</Typography>
-                ) : products.length === 0 ? (
-                  <Typography sx={{ opacity: 0.85 }}>
-                    No products found in Firestore.
-                  </Typography>
-                ) : (
-                  <Grid container spacing={{ xs: 2, md: 3 }}>
-                    {products.map((p) => (
-                      <Grid item xs={12} md={6} lg={4} key={p.id}>
-                        <AdminProductCard
-                          image={p.imageUrl ?? p.image}
-                          name={String(p.name ?? "")}
-                          price={Number(p.price ?? 0)}
-                          disableActions={adminSaving}
-                          onEdit={() => startAdminEdit(p)}
-                          onDelete={() => handleAdminDelete(p.id)}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                )}
-              </Box>
-            ) : (
-              <Box
-                sx={{
-                  mt: 4,
-                  position: "relative",
-                  borderRadius: 4,
-                  border: "1px solid rgba(255,255,255,0.18)",
-                  backgroundColor: "rgba(0,0,0,0.22)",
-                  backdropFilter: "blur(8px)",
-                  p: { xs: 2, md: 2.5 },
-                  overflow: "hidden",
-                  "--pv": productsPerView,
-                  "--cardGap": { xs: "16px", md: "24px" },
-                }}
+            <Box
+              sx={{
+                mt: 4,
+                position: "relative",
+                borderRadius: 4,
+                border: "1px solid rgba(255,255,255,0.18)",
+                backgroundColor: "rgba(0,0,0,0.22)",
+                backdropFilter: "blur(8px)",
+                p: { xs: 2, md: 2.5 },
+                overflow: "hidden",
+                "--pv": productsPerView,
+                "--cardGap": { xs: "16px", md: "24px" },
+              }}
               >
               <IconButton
                 aria-label="Previous products"
@@ -1112,7 +813,6 @@ export default function Products() {
                 </Box>
               )}
               </Box>
-            )}
           </Box>
         </Container>
       </Box>

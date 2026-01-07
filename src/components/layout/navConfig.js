@@ -1,26 +1,47 @@
-export const navItems = [
+export const userNavItems = [
   "Home",
   "Courses",
+  "Products",
   "Library",
-  "Product",
-  "Ijtemai Qurbani",
+  "Ilm Ul Adad Calculator",
+  "Khidmat e Khalq",
   "Mureed Counter",
-  "Ilm‑ul‑Adadad Calculator",
   "Istikhara",
   "Appointment",
 ];
 
+export const adminNavItems = [
+  "Home",
+  "Add Course",
+  "Add Product",
+  "Library",
+  "Ilm Ul Adad Calculator",
+  "Khidmat e Khalq",
+  "Mureed Counter",
+  "Istikhara",
+  "Appointment",
+];
+
+// For backward compatibility
+export const navItems = userNavItems;
+
 export const routeByItem = {
   Home: "/",
   Courses: "/courses",
+  Products: "/products",
+  "Add Course": "/admin/courses",
+  "Add Product": "/admin/products",
   Library: "/library",
-  Product: "/products",
-  "Ijtemai Qurbani": "/ijtemai-qurbani",
+  "Ilm Ul Adad Calculator": "/ilm-ul-adad-calculator",
+  "Khidmat e Khalq": "/khidmat-e-khalq",
   "Mureed Counter": "/mureed-counter",
-  "Ilm‑ul‑Adadad Calculator": "/ilm-ul-adadad-calculator",
   Istikhara: "/istikhara",
   Appointment: "/appointment",
 };
+
+export function getNavItems(isAdmin) {
+  return isAdmin ? adminNavItems : userNavItems;
+}
 
 export function getNavTo(item) {
   return routeByItem[item] ?? "/";
