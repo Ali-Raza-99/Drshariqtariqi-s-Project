@@ -23,21 +23,30 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import SchoolIcon from "@mui/icons-material/School";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import YouTubeIcon from "@mui/icons-material/YouTube";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import TwitterIcon from "@mui/icons-material/Twitter";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import ShareIcon from "@mui/icons-material/Share";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import CartQuantityControl from "./cart/CartQuantityControl";
 
-import amliyatImg from "../assets/amliyat.jpg";
 import slide1Img from "../assets/1.png";
-import slide2Img from "../assets/2.png";
+import slide5Img from "../assets/5.png";
 import logoImg from "../assets/mainlogo.png";
 import oilImg from "../assets/oil.jpeg";
+import shariq from "../assets/shariq.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
 import powderImg from "../assets/powder.jpeg";
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile } from "../firebase/firestore";
 import { getNavItems, getNavTo, isNavItemActive } from "./layout/navConfig";
+import Footer from "./layout/Footer";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -45,19 +54,19 @@ const CartTransition = React.forwardRef(function CartTransition(props, ref) {
 
 const sliderItems = [
   {
-    title: "Shazli Ruhani Darsgah",
+    title: "Hakeem Shariq Tariq",
     subtitle: "A Center of Spiritual Healing & Divine Knowledge",
-    image: amliyatImg,
+    image: slide1Img,
   },
   {
     title: "Spiritual Guidance",
     subtitle: "Based on Quran, Sunnah & Sufi Wisdom",
-    image: slide1Img,
+    image: slide5Img,
   },
   {
     title: "Learning & Resources",
-    subtitle: "Courses, Library & More",
-    image: slide2Img,
+    subtitle: "Courses, Products & More",
+    image: slide1Img,
   },
 ];
 
@@ -165,8 +174,108 @@ export default function HomePage() {
     <>
       <CssBaseline />
 
-      {/* NAVBAR */}
-      <AppBar
+      {/* FIXED SOCIAL ICONS */}
+      <Box
+        sx={{
+          position: "fixed",
+          left: 16,
+          bottom: 60,
+          zIndex: 1000,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
+        <IconButton
+          sx={{
+            width: 50,
+            height: 50,
+            bgcolor: "rgba(0, 0, 0, 0.7)",
+            backdropFilter: "blur(10px)",
+            border: "2px solid rgba(255, 255, 255, 0.3)",
+            color: "#fff",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              bgcolor: "rgba(255, 255, 255, 0.2)",
+              transform: "scale(1.05)",
+              boxShadow: "0 4px 20px rgba(255, 255, 255, 0.3)",
+            },
+            "&:hover ~ .social-icons": {
+              opacity: 1,
+              transform: "translateX(0)",
+              pointerEvents: "auto",
+            },
+          }}
+        >
+          <ShareIcon />
+        </IconButton>
+
+        <Box
+          className="social-icons"
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 1,
+            opacity: 0,
+            transform: "translateX(-20px)",
+            pointerEvents: "none",
+            transition: "all 0.4s ease",
+            "&:hover": {
+              opacity: 1,
+              transform: "translateX(0)",
+              pointerEvents: "auto",
+            },
+          }}
+        >
+          {[
+            { icon: <FacebookIcon />, url: "https://facebook.com", label: "Facebook" },
+            { icon: <YouTubeIcon />, url: "https://youtube.com", label: "YouTube" },
+            { icon: <InstagramIcon />, url: "https://instagram.com", label: "Instagram" },
+            { icon: <TwitterIcon />, url: "https://twitter.com", label: "Twitter" },
+            { icon: <WhatsAppIcon />, url: "https://whatsapp.com", label: "WhatsApp" },
+          ].map((social) => (
+            <IconButton
+              key={social.label}
+              component="a"
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={social.label}
+              sx={{
+                width: 45,
+                height: 45,
+                bgcolor: "rgba(0, 0, 0, 0.6)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#fff",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  bgcolor: "rgba(255, 255, 255, 0.15)",
+                  transform: "translateY(-3px)",
+                  boxShadow: "0 4px 20px rgba(255, 255, 255, 0.2)",
+                },
+              }}
+            >
+              {social.icon}
+            </IconButton>
+          ))}
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          minHeight: "100vh",
+          backgroundColor: "#fff",
+          backgroundImage: `url(${slide5Img})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundAttachment: "fixed",
+        }}
+      >
+        {/* NAVBAR */}
+        <AppBar
         position="fixed"
         elevation={0}
         sx={{
@@ -209,7 +318,7 @@ export default function HomePage() {
                 gap: 1,
               }}
             >
-              {getNavItems(isAdmin).map((item) => {
+              {getNavItems(isAdmin, !!currentUser).map((item) => {
                 const to = getNavTo(item);
                 const isActive = isNavItemActive(item, location.pathname);
 
@@ -445,50 +554,13 @@ export default function HomePage() {
                                   </Typography>
                                 </Box>
 
-                                <Stack direction="row" spacing={0.75} alignItems="center">
-                                  <IconButton
-                                    onClick={() => decCart(p.id)}
-                                    sx={{
-                                      color: "#fff",
-                                      border: "1px solid rgba(255,255,255,0.24)",
-                                      bgcolor: "transparent",
-                                      "&:hover": { bgcolor: "rgba(255,255,255,0.08)" },
-                                    }}
-                                    size="small"
-                                    aria-label={`Decrease ${p.name}`}
-                                  >
-                                    <RemoveIcon fontSize="small" />
-                                  </IconButton>
-
-                                  <Box
-                                    sx={{
-                                      minWidth: 36,
-                                      textAlign: "center",
-                                      py: 0.6,
-                                      borderRadius: 1.5,
-                                      border: "1px solid rgba(255,255,255,0.18)",
-                                      bgcolor: "rgba(0,0,0,0.25)",
-                                    }}
-                                  >
-                                    <Typography fontWeight={900} fontSize={13}>
-                                      {qty}
-                                    </Typography>
-                                  </Box>
-
-                                  <IconButton
-                                    onClick={() => incCart(p.id)}
-                                    sx={{
-                                      color: "#fff",
-                                      border: "1px solid rgba(255,255,255,0.24)",
-                                      bgcolor: "transparent",
-                                      "&:hover": { bgcolor: "rgba(255,255,255,0.08)" },
-                                    }}
-                                    size="small"
-                                    aria-label={`Increase ${p.name}`}
-                                  >
-                                    <AddIcon fontSize="small" />
-                                  </IconButton>
-                                </Stack>
+                                <CartQuantityControl
+                                  quantity={qty}
+                                  onIncrease={() => incCart(p.id)}
+                                  onDecrease={() => decCart(p.id)}
+                                  maxQuantity={99}
+                                  productName={p.name}
+                                />
 
                                 <Box sx={{ width: 92, textAlign: "right" }}>
                                   <Typography fontWeight={900} sx={{ lineHeight: 1.15 }}>
@@ -576,19 +648,22 @@ export default function HomePage() {
               background: "rgba(0,0,0,0.55)",
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Container>
-              <Typography variant="h2" color="white" fontWeight={700}>
-                {activeSlide.title}
-              </Typography>
-              <Typography
-                variant="h5"
-                color="white"
-                sx={{ mt: 2, maxWidth: 600 }}
-              >
-                {activeSlide.subtitle}
-              </Typography>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="h2" color="white" fontWeight={700}>
+                  {activeSlide.title}
+                </Typography>
+                <Typography
+                  variant="h5"
+                  color="white"
+                  sx={{ mt: 2, mx: "auto", maxWidth: 600 }}
+                >
+                  {activeSlide.subtitle}
+                </Typography>
+              </Box>
             </Container>
           </Box>
 
@@ -657,67 +732,270 @@ export default function HomePage() {
       </Box>
 
       {/* ABOUT SECTION */}
-      <Box sx={{ py: 8, background: "#fff" }}>
-        <Container>
-          <Grid container spacing={6} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h4" fontWeight={700} gutterBottom>
-                About the Darsgah
+      <Box
+        sx={{
+          py: 6,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              bgcolor: "rgba(0, 0, 0, 0.3)",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 4,
+              height: "100%",
+              p: { xs: 3, md: 4 },
+              display: "flex",
+              flexDirection: { xs: "column",sm:'row', md: "row" },
+              alignItems: "center",
+              gap: { xs: 3, md: 4 },
+            }}
+          >
+            <Box
+              sx={{
+                flex: 1,
+                color: "#fff",
+              }}
+            >
+              <Typography 
+                variant="h4" 
+                fontWeight={700} 
+                gutterBottom 
+                sx={{ 
+                  fontSize: { xs: "1.75rem", md: "2.125rem" },
+                  color: "#fff"
+                }}
+              >
+                About Hakeem Shariq Tariq
               </Typography>
-              <Typography color="text.secondary" lineHeight={1.8}>
-                Shazli Ruhani Darsgah is dedicated to spreading spiritual
-                knowledge, healing sciences, and divine wisdom under the
-                guidance of Dr. Abdul Wajid Shazli. Our mission is to guide
-                humanity through faith, knowledge, and spiritual discipline.
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  lineHeight: 1.8, 
+                  color: "rgba(255,255,255,0.85)", 
+                  fontSize: { xs: "0.95rem", md: "1rem" }
+                }}
+              >
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
+                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud 
+                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute 
+                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
+                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
+                deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error 
+                sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae 
+                ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
               </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
+            </Box>
+            <Box
+              sx={{
+                flexShrink: 0,
+              }}
+            >
               <Box
                 component="img"
-                src={amliyatImg}
-                alt="About"
-                sx={{ width: "100%", borderRadius: 2 }}
+                src={shariq}
+                alt="Hakeem Shariq Tariq"
+                sx={{
+                  width: "465px",
+                  height: "465px",
+                  objectFit: "cover",
+                  borderRadius: 3,
+                  border: "2px solid rgba(255,255,255,0.2)",
+                  display: "block",
+                }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Container>
       </Box>
 
       {/* SERVICES SECTION */}
-      <Box sx={{ py: 8, background: "#000", color: "white" }}>
-        <Container>
-          <Typography variant="h4" fontWeight={700} textAlign="center">
-            Our Services
-          </Typography>
-
-          <Grid container spacing={4} sx={{ mt: 4 }}>
-            {["Istikhara", "Spiritual Healing", "Rohani Courses", "Appointments"].map(
-              (service) => (
-                <Grid item xs={12} md={3} key={service}>
-                  <Box
+      <Box
+        sx={{
+          py: 8,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} sm={4} md={4}>
+              <Box
+                component={RouterLink}
+                to="/appointment"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  p: 5,
+                  px: 5.2,
+                  minHeight: 280,
+                  borderRadius: 3,
+                  bgcolor: "rgba(0, 0, 0, 0.3)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+                    bgcolor: "rgba(0, 0, 0, 0.4)",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: "50%",
+                    bgcolor: "rgba(255, 255, 255, 0.1)",
+                    border: "2px solid rgba(255, 255, 255, 0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                  }}
+                >
+                  <CalendarMonthIcon
                     sx={{
-                      p: 3,
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      borderRadius: 2,
-                      textAlign: "center",
+                      fontSize: 60,
+                      color: "#fff",
                     }}
-                  >
-                    <Typography fontWeight={600}>{service}</Typography>
-                  </Box>
-                </Grid>
-              )
-            )}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight={700}
+                  sx={{
+                    color: "#fff",
+                  }}
+                >
+                  Appointments
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={4} md={4}>
+              <Box
+                component={RouterLink}
+                to="/courses"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  p: 5,
+                  px: 8,
+                  minHeight: 280,
+                  borderRadius: 3,
+                  bgcolor: "rgba(0, 0, 0, 0.3)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+                    bgcolor: "rgba(0, 0, 0, 0.4)",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: "50%",
+                    bgcolor: "rgba(255, 255, 255, 0.1)",
+                    border: "2px solid rgba(255, 255, 255, 0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                  }}
+                >
+                  <SchoolIcon
+                    sx={{
+                      fontSize: 60,
+                      color: "#fff",
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight={700}
+                  sx={{
+                    color: "#fff",
+                  }}
+                >
+                  Courses
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={4} md={4}>
+              <Box
+                component={RouterLink}
+                to="/products"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  p: 5,
+                  px: 8,
+                  minHeight: 280,
+                  borderRadius: 3,
+                  bgcolor: "rgba(0, 0, 0, 0.3)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+                    bgcolor: "rgba(0, 0, 0, 0.4)",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    borderRadius: "50%",
+                    bgcolor: "rgba(255, 255, 255, 0.1)",
+                    border: "2px solid rgba(255, 255, 255, 0.2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                  }}
+                >
+                  <ShoppingBagIcon
+                    sx={{
+                      fontSize: 60,
+                      color: "#fff",
+                    }}
+                  />
+                </Box>
+                <Typography
+                  variant="h5"
+                  fontWeight={700}
+                  sx={{
+                    color: "#fff",
+                  }}
+                >
+                  Products
+                </Typography>
+              </Box>
+            </Grid>
           </Grid>
         </Container>
       </Box>
 
-      {/* FOOTER */}
-      <Box sx={{ py: 3, background: "#111", color: "#aaa" }}>
-        <Container>
-          <Typography textAlign="center" fontSize={14}>
-            © {new Date().getFullYear()} Shazli Ruhani Darsgah. All rights reserved.
-          </Typography>
-        </Container>
+      <Footer />
       </Box>
     </>
   );
@@ -843,7 +1121,7 @@ export default function HomePage() {
 //               About Shazli Ruhani Darsgah
 //             </Typography>
 //             <Typography variant="body1" color="text.secondary">
-//               Shazli Ruhani Darsgah founded by Dr. Abdul Wajid Shazli shares spiritual wisdom in Sufism and healing sciences blending tradition with modern perspectives. Explore courses, library resources, and more.
+//               Shazli Ruhani Darsgah founded by Hakeem Shariq Tariq shares spiritual wisdom in Sufism and healing sciences blending tradition with modern perspectives. Explore courses, library resources, and more.
 //             </Typography>
 //           </Grid>
 //           <Grid item xs={12} md={6}>

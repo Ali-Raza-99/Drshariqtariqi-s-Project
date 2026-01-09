@@ -8,6 +8,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import bgImage from "../../assets/5.png";
 import { useAuth } from "../../context/AuthContext";
@@ -17,6 +18,7 @@ import { firebaseErrorMessage } from "../../utils/firebaseErrorMessage";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const navigate = useNavigate();
@@ -27,16 +29,7 @@ const Login = () => {
     setSubmitting(true);
     try {
       const user = await login(email, password);
-      try {
-        const profile = await getUserProfile(user?.uid);
-        if (profile?.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate("/", { replace: true });
-        }
-      } catch {
-        navigate("/", { replace: true });
-      }
+      navigate("/", { replace: true });
     } catch (err) {
       setSubmitError(firebaseErrorMessage(err, "Login failed"));
     } finally {

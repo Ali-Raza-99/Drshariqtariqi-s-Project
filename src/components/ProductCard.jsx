@@ -11,9 +11,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import StarIcon from "@mui/icons-material/Star";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useAuth } from "../context/AuthContext";
 import LoginFirstDialog from "./auth/LoginFirstDialog";
-import AddToCartButton from "./cart/AddToCartButton";
 
 export default function ProductCard({
   image,
@@ -21,6 +21,7 @@ export default function ProductCard({
   price,
   onAddToCart,
   onBuyNow,
+  onViewDetails,
 }) {
   const { currentUser } = useAuth();
   const [qty, setQty] = useState(1);
@@ -64,6 +65,7 @@ export default function ProductCard({
           width: "100%",
           height: "220px",
           flexShrink: 0,
+          position: "relative",
         }}
       >
         <CardMedia
@@ -80,6 +82,29 @@ export default function ProductCard({
             maxHeight: "220px",
           }}
         />
+        {/* INFO ICON */}
+        <IconButton
+          onClick={onViewDetails}
+          sx={{
+            position: "absolute",
+            top: 8,
+            left: 8,
+            bgcolor: "rgba(0,0,0,0.7)",
+            backdropFilter: "blur(8px)",
+            color: "white",
+            width: 32,
+            height: 32,
+            border: "1px solid rgba(255,255,255,0.2)",
+            "&:hover": {
+              bgcolor: "rgba(0,0,0,0.85)",
+              borderColor: "rgba(255,255,255,0.4)",
+              transform: "scale(1.1)",
+            },
+            transition: "all 0.2s ease",
+          }}
+        >
+          <InfoOutlinedIcon sx={{ fontSize: 18 }} />
+        </IconButton>
       </Box>
 
       {/* TITLE + STARS */}
@@ -177,36 +202,24 @@ export default function ProductCard({
         </IconButton>
       </Stack>
 
-      {/* ACTION BUTTONS */}
-      <Stack direction="row" spacing={1} mt={1.5}>
-        <Button
-          fullWidth
-          disableRipple
-          onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty }))}
-          sx={{
-            bgcolor: "white",
-            color: "black",
-            fontWeight: 800,
-            borderRadius: 2,
-            textTransform: "none",
-            py: 1,
-            "&:hover": { bgcolor: "#eee" },
-          }}
-        >
-          Buy Now
-        </Button>
-
-        <AddToCartButton
-          onAddToCart={() => onAddToCart?.({ name, price, qty })}
-          payload={undefined}
-          sx={{
-            bgcolor: "white",
-            color: "black",
-            borderRadius: 2,
-          }}
-          ariaLabel="Add to cart"
-        />
-      </Stack>
+      {/* ACTION BUTTON */}
+      <Button
+        fullWidth
+        disableRipple
+        onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty }))}
+        sx={{
+          bgcolor: "white",
+          color: "black",
+          fontWeight: 800,
+          borderRadius: 2,
+          textTransform: "none",
+          py: 1,
+          mt: 1.5,
+          "&:hover": { bgcolor: "#eee" },
+        }}
+      >
+        Buy Now
+      </Button>
 
       <LoginFirstDialog
         open={loginPromptOpen}

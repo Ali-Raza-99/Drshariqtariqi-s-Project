@@ -29,6 +29,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import Footer from "../layout/Footer";
 
 import bgImg from "../../assets/5.png";
 import logoImg from "../../assets/mainlogo.png";
@@ -1076,11 +1077,12 @@ export default function AdminCourses() {
             <CloseIcon />
           </IconButton>
 
-          <DialogContent sx={{ p: 0 }}>
+          <DialogContent sx={{ p: 0, maxHeight: "85vh", overflowY: "auto" }}>
             {selectedCourse && (
               <Box
                 sx={{
                   p: { xs: 3, md: 4 },
+                  pb: { xs: 4, md: 5 },
                   minHeight: 400,
                 }}
               >
@@ -1126,11 +1128,11 @@ export default function AdminCourses() {
                   Course Details
                 </Typography>
 
-                <Box sx={{ display: "flex", gap: 3, mb: 3, alignItems: "stretch" }}>
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, mb: 4, alignItems: "stretch" }}>
                   {/* LEFT SIDE - COURSE IMAGE */}
                   <Box
                     sx={{
-                      width: "30%",
+                      width: { xs: "100%", md: "35%" },
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -1142,7 +1144,7 @@ export default function AdminCourses() {
                       alt={selectedCourse.name}
                       sx={{
                         width: "100%",
-                        maxHeight: 300,
+                        height: { xs: 250, md: 350 },
                         borderRadius: 2,
                         objectFit: "cover",
                         border: "2px solid rgba(255,255,255,0.2)",
@@ -1154,14 +1156,14 @@ export default function AdminCourses() {
                   {/* RIGHT SIDE - DETAILS WITH SCROLL */}
                   <Box
                     sx={{
-                      width: "70%",
+                      width: { xs: "100%", md: "65%" },
                       overflowY: "auto",
                       p: 2,
                       pl: 3,
                       backgroundColor: "rgba(255,255,255,0.05)",
                       borderRadius: 2,
                       border: "1px solid rgba(255,255,255,0.1)",
-                      maxHeight: 300,
+                      height: { xs: 200, md: 350 },
                       direction: "rtl",
                       "&::-webkit-scrollbar": {
                         width: "8px",
@@ -1199,15 +1201,7 @@ export default function AdminCourses() {
         </Box>
       </Dialog>
 
-      {/* FOOTER */}
-      <Box sx={{ py: 3, background: "#111", color: "#aaa" }}>
-        <Container>
-          <Typography textAlign="center" fontSize={14}>
-            © {new Date().getFullYear()} Shazli Ruhani Darsgah. All rights
-            reserved.
-          </Typography>
-        </Container>
-      </Box>
+      <Footer />
     </>
   );
 }

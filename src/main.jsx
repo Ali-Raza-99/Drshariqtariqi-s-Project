@@ -13,7 +13,7 @@ const darkTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "'Josefin Sans', sans-serif",
   },
   components: {
     MuiInputLabel: {

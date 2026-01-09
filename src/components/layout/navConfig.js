@@ -1,25 +1,31 @@
+// Navigation items for unlogged users (public) - same as logged-in users
+export const publicNavItems = [
+  "Home",
+  "Courses",
+  "Products",
+  "Khidmat e Khalq",
+  "Mureed Registry",
+  "Appointment",
+];
+
+// Navigation items for logged-in users
 export const userNavItems = [
   "Home",
   "Courses",
   "Products",
-  "Library",
-  "Ilm Ul Adad Calculator",
   "Khidmat e Khalq",
-  "Mureed Counter",
-  "Istikhara",
+  "Mureed Registry",
   "Appointment",
 ];
 
+// Navigation items for admin users
 export const adminNavItems = [
   "Home",
   "Add Course",
   "Add Product",
-  "Library",
-  "Ilm Ul Adad Calculator",
   "Khidmat e Khalq",
-  "Mureed Counter",
-  "Istikhara",
-  "Appointment",
+  "Mureed's Requests",
+  "View Appointment",
 ];
 
 // For backward compatibility
@@ -31,16 +37,16 @@ export const routeByItem = {
   Products: "/products",
   "Add Course": "/admin/courses",
   "Add Product": "/admin/products",
-  Library: "/library",
-  "Ilm Ul Adad Calculator": "/ilm-ul-adad-calculator",
   "Khidmat e Khalq": "/khidmat-e-khalq",
-  "Mureed Counter": "/mureed-counter",
-  Istikhara: "/istikhara",
+  "Mureed Registry": "/mureed-counter",
+  "Mureed's Requests": "/admin/mureed-requests",
   Appointment: "/appointment",
+  "View Appointment": "/admin/appointments",
 };
 
-export function getNavItems(isAdmin) {
-  return isAdmin ? adminNavItems : userNavItems;
+export function getNavItems(isAdmin, isLoggedIn) {
+  if (isAdmin) return adminNavItems;
+  return userNavItems; // Both logged-in and unlogged users see the same
 }
 
 export function getNavTo(item) {

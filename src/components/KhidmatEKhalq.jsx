@@ -24,6 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import Footer from "./layout/Footer";
 
 import logoImg from "../assets/logo.jpeg";
 import amliyatImg from "../assets/amliyat.jpg";
@@ -528,57 +529,56 @@ export default function IjmiatiQurbani() {
 				<Container maxWidth="md">
 					<Stack spacing={2.5} sx={{ py: { xs: 4, md: 6 } }}>
 						<Box sx={{ mt: { xs: 1, md: 2 } }}>
-							<Box component="img" src={amliyatImg} alt="About" sx={{ width: "100%", borderRadius: 2 }} />
+							<Box component="img" src={amliyatImg} alt="Khidmat e Khalq" sx={{ width: "100%", borderRadius: 2 }} />
 						</Box>
 						<Typography variant="h4" fontWeight={900}>
-							Ijtemai Qurbani
+							Khidmat e Khalq
 						</Typography>
-						<Typography sx={{ opacity: 0.85 }}>
-							Information and guidance for the Ijtemai Qurbani program.
+						<Typography sx={{ opacity: 0.85, lineHeight: 1.8 }}>
+							Khidmat e Khalq, which translates to "Service to Humanity," is a noble initiative dedicated to serving the community and helping those in need. This program embodies the spirit of compassion, generosity, and selfless service, following the teachings of Islam to care for and support our fellow human beings.
 						</Typography>
 
 						<Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
 
 						<Stack spacing={1}>
 							<Typography variant="h6" fontWeight={800}>
-								Details
+								Our Mission
 							</Typography>
-							<Typography sx={{ opacity: 0.85 }}>
-								- Purpose: Collective Qurbani arrangement for the community.
-							</Typography>
-							<Typography sx={{ opacity: 0.85 }}>
-								- Process: Register your share, then payment confirmation is done by the team.
-							</Typography>
-							<Typography sx={{ opacity: 0.85 }}>
-								- Distribution: Meat is distributed to deserving families.
+							<Typography sx={{ opacity: 0.85, lineHeight: 1.8 }}>
+								Through Khidmat e Khalq, we strive to provide essential support and assistance to underprivileged members of our community. Our mission is to spread kindness, offer relief to those facing hardships, and create a positive impact in society through various charitable activities and welfare programs.
 							</Typography>
 						</Stack>
 
 						<Stack spacing={1}>
 							<Typography variant="h6" fontWeight={800}>
-								Sample Shares
+								What We Do
 							</Typography>
 							<Typography sx={{ opacity: 0.85 }}>
-								- Cow share (1/7): Rs. 0
+								- Provide food and essential supplies to families in need
 							</Typography>
 							<Typography sx={{ opacity: 0.85 }}>
-								- Goat share (full): Rs. 0
+								- Organize community welfare programs and charitable events
 							</Typography>
-							<Typography variant="body2" sx={{ opacity: 0.7 }}>
-								Update these amounts and instructions as needed.
+							<Typography sx={{ opacity: 0.85 }}>
+								- Offer support during religious occasions and community gatherings
+							</Typography>
+							<Typography sx={{ opacity: 0.85 }}>
+								- Facilitate educational and spiritual guidance initiatives
+							</Typography>
+						</Stack>
+
+						<Stack spacing={1}>
+							<Typography variant="h6" fontWeight={800}>
+								Get Involved
+							</Typography>
+							<Typography sx={{ opacity: 0.85, lineHeight: 1.8 }}>
+								We welcome everyone who wishes to contribute to this noble cause. Whether through donations, volunteering, or spreading awareness, every effort makes a difference in transforming lives and building a stronger, more compassionate community.
 							</Typography>
 						</Stack>
 					</Stack>
 				</Container>
 
-				{/* FOOTER */}
-				<Box sx={{ py: 3, background: "#111", color: "#aaa", mt: { xs: 6, md: 10 } }}>
-					<Container>
-						<Typography textAlign="center" fontSize={14}>
-							© {new Date().getFullYear()} Shazli Ruhani Darsgah. All rights reserved.
-						</Typography>
-					</Container>
-				</Box>
+				<Footer />
 			</Box>
 		</>
 	);

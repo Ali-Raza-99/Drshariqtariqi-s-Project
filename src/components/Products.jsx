@@ -5,15 +5,19 @@ import {
   Badge,
   Box,
   Button,
+  Card,
+  CardMedia,
   Container,
   CssBaseline,
   Divider,
   Dialog,
+  DialogContent,
   Grid,
   IconButton,
   Menu,
   MenuItem,
   Slide,
+  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -28,6 +32,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import Footer from "./layout/Footer";
 
 import oilImg from "../assets/oil.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
@@ -55,6 +60,9 @@ export default function Products() {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminChecked, setAdminChecked] = useState(false);
+
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const cartProducts = useMemo(
     () => [
@@ -229,6 +237,16 @@ export default function Products() {
   const handleLogout = async () => {
     closeProfileMenu();
     await logout();
+  };
+
+  const openDetailsDialog = (product) => {
+    setSelectedProduct(product);
+    setDetailsDialogOpen(true);
+  };
+
+  const closeDetailsDialog = () => {
+    setDetailsDialogOpen(false);
+    setSelectedProduct(null);
   };
 
   return (
@@ -750,6 +768,7 @@ export default function Products() {
                           name={product.name}
                           price={product.price}
                           onAddToCart={({ qty }) => addToCart({ id: product.id, qty })}
+                          onViewDetails={() => openDetailsDialog(product)}
                         />
                         {isInCart && (
                           <Typography
@@ -817,14 +836,178 @@ export default function Products() {
         </Container>
       </Box>
 
-      {/* FOOTER */}
-      <Box sx={{ py: 3, background: "#111", color: "#aaa" }}>
-        <Container>
-          <Typography textAlign="center" fontSize={14}>
-            © {new Date().getFullYear()} Shazli Ruhani Darsgah. All rights reserved.
-          </Typography>
-        </Container>
-      </Box>
+      {/* PRODUCT DETAILS DIALOG */}
+      <Dialog
+        open={detailsDialogOpen}
+        onClose={closeDetailsDialog}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: "rgba(15, 15, 15, 0.98)",
+            backgroundImage: `url(${bgImg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: 4,
+            boxShadow: "0 20px 70px rgba(0,0,0,0.7)",
+            backdropFilter: "blur(20px)",
+            color: "#fff",
+            overflow: "hidden",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            bgcolor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(10px)",
+          }}
+        >
+          <IconButton
+            onClick={closeDetailsDialog}
+            sx={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              color: "white",
+              bgcolor: "rgba(0,0,0,0.5)",
+              zIndex: 10,
+              "&:hover": {
+                bgcolor: "rgba(255,255,255,0.1)",
+                transform: "rotate(90deg)",
+              },
+              transition: "all 0.3s ease",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+
+          <DialogContent sx={{ p: 0, maxHeight: "85vh", overflowY: "auto" }}>
+            {selectedProduct && (
+              <Box
+                sx={{
+                  p: { xs: 3, md: 4 },
+                  pb: { xs: 4, md: 5 },
+                  minHeight: 400,
+                }}
+              >
+                <Typography
+                  variant="h4"
+                  fontWeight={800}
+                  sx={{
+                    color: "white",
+                    mb: 1,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                  }}
+                >
+                  {selectedProduct.name}
+                </Typography>
+
+                <Typography
+                  variant="h5"
+                  fontWeight={600}
+                  sx={{
+                    color: "#4CAF50",
+                    mb: 3,
+                  }}
+                >
+                  Rs. {selectedProduct.price}
+                </Typography>
+
+                <Divider
+                  sx={{
+                    borderColor: "rgba(255,255,255,0.2)",
+                    mb: 3,
+                  }}
+                />
+
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  sx={{
+                    color: "rgba(255,255,255,0.9)",
+                    mb: 2,
+                  }}
+                >
+                  Product Details
+                </Typography>
+
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, mb: 4, alignItems: "stretch" }}>
+                  {/* LEFT SIDE - PRODUCT IMAGE */}
+                  <Box
+                    sx={{
+                      width: { xs: "100%", md: "35%" },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={selectedProduct.imageUrl ?? selectedProduct.image}
+                      alt={selectedProduct.name}
+                      sx={{
+                        width: "100%",
+                        height: { xs: 250, md: 350 },
+                        borderRadius: 2,
+                        objectFit: "cover",
+                        border: "2px solid rgba(255,255,255,0.2)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                      }}
+                    />
+                  </Box>
+
+                  {/* RIGHT SIDE - DETAILS WITH SCROLL */}
+                  <Box
+                    sx={{
+                      width: { xs: "100%", md: "65%" },
+                      overflowY: "auto",
+                      p: 2,
+                      pl: 3,
+                      backgroundColor: "rgba(255,255,255,0.05)",
+                      borderRadius: 2,
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      height: { xs: 200, md: 350 },
+                      direction: "rtl",
+                      "&::-webkit-scrollbar": {
+                        width: "8px",
+                      },
+                      "&::-webkit-scrollbar-track": {
+                        background: "rgba(255,255,255,0.05)",
+                        borderRadius: "4px",
+                      },
+                      "&::-webkit-scrollbar-thumb": {
+                        background: "rgba(255,255,255,0.2)",
+                        borderRadius: "4px",
+                        "&:hover": {
+                          background: "rgba(255,255,255,0.3)",
+                        },
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: "rgba(255,255,255,0.95)",
+                        lineHeight: 1.8,
+                        whiteSpace: "pre-wrap",
+                        fontSize: "1.05rem",
+                        direction: "ltr",
+                      }}
+                    >
+                      {selectedProduct.detail || selectedProduct.description || "No details available for this product."}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </DialogContent>
+        </Box>
+      </Dialog>
+
+      <Footer />
     </>
   );
 }

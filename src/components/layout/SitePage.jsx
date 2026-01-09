@@ -24,7 +24,9 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import Footer from "./Footer";
 
+import bgImg from "../../assets/5.png";
 import logoImg from "../../assets/mainlogo.png";
 import oilImg from "../../assets/oil.jpeg";
 import bakhorImg from "../../assets/bakhor.jpeg";
@@ -168,7 +170,7 @@ export default function SitePage({ children, maxWidth = "md" }) {
 								gap: 1,
 							}}
 						>
-							{getNavItems(isAdmin).map((item) => {
+							{getNavItems(isAdmin, !!currentUser).map((item) => {
 								const to = getNavTo(item);
 								const isActive = isNavItemActive(item, location.pathname);
 
@@ -521,17 +523,24 @@ export default function SitePage({ children, maxWidth = "md" }) {
 				</Container>
 			</AppBar>
 
-			<Box sx={{ minHeight: "100vh", bgcolor: "#000", color: "#fff", pt: { xs: 10, md: 12 } }}>
-				<Container maxWidth={maxWidth}>{children}</Container>
+		<Box 
+			sx={{ 
+				minHeight: "100vh", 
+				bgcolor: "#000", 
+				color: "#fff", 
+				pt: { xs: 10, md: 12 },
+				backgroundColor: "#fff",
+				backgroundImage: `url(${bgImg})`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+				backgroundRepeat: "no-repeat",
+				backgroundAttachment: "fixed",
+			}}
+		>
+			<Container maxWidth={maxWidth}>{children}</Container>
 
-				<Box sx={{ py: 3, background: "#111", color: "#aaa", mt: { xs: 6, md: 10 } }}>
-					<Container>
-						<Typography textAlign="center" fontSize={14}>
-							© {new Date().getFullYear()} Shazli Ruhani Darsgah. All rights reserved.
-						</Typography>
-					</Container>
-				</Box>
-			</Box>
-		</>
-	);
+			<Footer />
+		</Box>
+	</>
+);
 }

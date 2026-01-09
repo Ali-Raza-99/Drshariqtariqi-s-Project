@@ -5,7 +5,6 @@ import Products from "./components/Products.jsx";
 import KhidmatEKhalq from "./components/KhidmatEKhalq.jsx";
 import Courses from "./components/Courses.jsx";
 import MureedCounter from "./components/MureedCounter.jsx";
-import Istikhara from "./components/Istikhara.jsx";
 import Appointment from "./components/Appointment.jsx";
 import Login from "./components/auth/Login.jsx";
 import Signup from "./components/auth/Signup.jsx";
@@ -24,8 +23,23 @@ function App() {
       <Route path="/khidmat-e-khalq" element={<KhidmatEKhalq />} />
       <Route path="/ijtemai-qurbani" element={<Navigate to="/khidmat-e-khalq" replace />} />
       <Route path="/mureed-counter" element={<MureedCounter />} />
-      <Route path="/istikhara" element={<Istikhara />} />
       <Route path="/appointment" element={<Appointment />} />
+      <Route
+        path="/admin/mureed-requests"
+        element={
+          <AdminRoute>
+            <MureedCounter />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/appointments"
+        element={
+          <AdminRoute>
+            <Appointment />
+          </AdminRoute>
+        }
+      />
       <Route
         path="/admin"
         element={

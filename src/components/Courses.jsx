@@ -26,6 +26,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import Footer from "./layout/Footer";
 
 import bgImg from "../assets/5.png";
 import logoImg from "../assets/mainlogo.png";
@@ -536,7 +537,7 @@ export default function Courses() {
         </Container>
       </Box>
 
-      {/* DETAILS DIALOG */}
+      {/* COURSE DETAILS DIALOG */}
       <Dialog
         open={detailsDialogOpen}
         onClose={closeDetailsDialog}
@@ -544,126 +545,143 @@ export default function Courses() {
         fullWidth
         PaperProps={{
           sx: {
-            background: "linear-gradient(135deg, rgba(15,15,25,0.98), rgba(25,25,35,0.98))",
+            bgcolor: "rgba(15, 15, 15, 0.98)",
             backgroundImage: `url(${bgImg})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            borderRadius: 4,
+            boxShadow: "0 20px 70px rgba(0,0,0,0.7)",
             backdropFilter: "blur(20px)",
-            borderRadius: 3,
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+            color: "#fff",
+            overflow: "hidden",
           },
         }}
       >
-        <DialogContent sx={{ p: 0, position: "relative" }}>
+        <Box
+          sx={{
+            position: "relative",
+            bgcolor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(10px)",
+          }}
+        >
           <IconButton
             onClick={closeDetailsDialog}
             sx={{
               position: "absolute",
               top: 16,
               right: 16,
-              color: "#fff",
-              backgroundColor: "rgba(0,0,0,0.5)",
-              backdropFilter: "blur(10px)",
+              color: "white",
+              bgcolor: "rgba(0,0,0,0.5)",
               zIndex: 10,
               "&:hover": {
-                backgroundColor: "rgba(0,0,0,0.7)",
+                bgcolor: "rgba(255,255,255,0.1)",
+                transform: "rotate(90deg)",
               },
+              transition: "all 0.3s ease",
             }}
           >
             <CloseIcon />
           </IconButton>
 
-          {selectedCourse && (
-            <Grid container spacing={0}>
-              <Grid item xs={12} md={5}>
-                <Box
+          <DialogContent sx={{ p: 0, maxHeight: "85vh", overflowY: "auto" }}>
+            {selectedCourse && (
+              <Box
+                sx={{
+                  p: { xs: 3, md: 4 },
+                  pb: { xs: 4, md: 5 },
+                  minHeight: 400,
+                }}
+              >
+                <Typography
+                  variant="h4"
+                  fontWeight={800}
                   sx={{
-                    height: { xs: 300, md: "100%" },
-                    minHeight: { md: 500 },
-                    position: "relative",
-                    overflow: "hidden",
-                    borderRadius: { xs: "12px 12px 0 0", md: "12px 0 0 12px" },
+                    color: "white",
+                    mb: 1,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
                   }}
                 >
-                  <CardMedia
-                    component="img"
-                    image={selectedCourse.imageUrl ?? selectedCourse.image}
-                    alt={selectedCourse.name}
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </Box>
-              </Grid>
+                  {selectedCourse.name}
+                </Typography>
 
-              <Grid item xs={12} md={7}>
-                <Box
+                <Typography
+                  variant="h5"
+                  fontWeight={600}
                   sx={{
-                    p: 4,
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
+                    color: "#4CAF50",
+                    mb: 3,
                   }}
                 >
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      color: "#fff",
-                      fontWeight: 700,
-                      mb: 2,
-                      textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    {selectedCourse.name}
-                  </Typography>
+                  Rs. {selectedCourse.price}
+                </Typography>
 
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      color: "#4fc3f7",
-                      fontWeight: 600,
-                      mb: 3,
-                    }}
-                  >
-                    Rs. {selectedCourse.price}
-                  </Typography>
+                <Divider
+                  sx={{
+                    borderColor: "rgba(255,255,255,0.2)",
+                    mb: 3,
+                  }}
+                />
 
-                  <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 3 }} />
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  sx={{
+                    color: "rgba(255,255,255,0.9)",
+                    mb: 2,
+                  }}
+                >
+                  Course Details
+                </Typography>
 
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: "#fff",
-                      fontWeight: 600,
-                      mb: 2,
-                    }}
-                  >
-                    Course Details
-                  </Typography>
-
+                <Box sx={{ display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 3, mb: 4, alignItems: "stretch" }}>
+                  {/* LEFT SIDE - COURSE IMAGE */}
                   <Box
                     sx={{
-                      flex: 1,
+                      width: { xs: "100%", md: "35%" },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={selectedCourse.imageUrl ?? selectedCourse.image}
+                      alt={selectedCourse.name}
+                      sx={{
+                        width: "100%",
+                        height: { xs: 250, md: 350 },
+                        borderRadius: 2,
+                        objectFit: "cover",
+                        border: "2px solid rgba(255,255,255,0.2)",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                      }}
+                    />
+                  </Box>
+
+                  {/* RIGHT SIDE - DETAILS WITH SCROLL */}
+                  <Box
+                    sx={{
+                      width: { xs: "100%", md: "65%" },
                       overflowY: "auto",
-                      pr: 1,
                       p: 2,
+                      pl: 3,
                       backgroundColor: "rgba(255,255,255,0.05)",
                       borderRadius: 2,
                       border: "1px solid rgba(255,255,255,0.1)",
-                      minHeight: 150,
+                      height: { xs: 200, md: 350 },
+                      direction: "rtl",
                       "&::-webkit-scrollbar": {
-                        width: 8,
+                        width: "8px",
                       },
                       "&::-webkit-scrollbar-track": {
                         background: "rgba(255,255,255,0.05)",
-                        borderRadius: 4,
+                        borderRadius: "4px",
                       },
                       "&::-webkit-scrollbar-thumb": {
                         background: "rgba(255,255,255,0.2)",
-                        borderRadius: 4,
+                        borderRadius: "4px",
                         "&:hover": {
                           background: "rgba(255,255,255,0.3)",
                         },
@@ -671,56 +689,26 @@ export default function Courses() {
                     }}
                   >
                     <Typography
+                      variant="body1"
                       sx={{
                         color: "rgba(255,255,255,0.95)",
-                        fontSize: "1.05rem",
                         lineHeight: 1.8,
                         whiteSpace: "pre-wrap",
+                        fontSize: "1.05rem",
+                        direction: "ltr",
                       }}
                     >
                       {selectedCourse.detail || "No details available for this course."}
                     </Typography>
                   </Box>
-
-                  <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={closeDetailsDialog}
-                      sx={{
-                        py: 1.5,
-                        fontSize: "1rem",
-                        fontWeight: 600,
-                        background: "linear-gradient(135deg, #4fc3f7 0%, #2196f3 100%)",
-                        color: "#fff",
-                        textTransform: "none",
-                        borderRadius: 2,
-                        "&:hover": {
-                          background: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 6px 20px rgba(79, 195, 247, 0.4)",
-                        },
-                        transition: "all 0.3s ease",
-                      }}
-                    >
-                      Close
-                    </Button>
-                  </Box>
                 </Box>
-              </Grid>
-            </Grid>
-          )}
-        </DialogContent>
+              </Box>
+            )}
+          </DialogContent>
+        </Box>
       </Dialog>
 
-      {/* FOOTER */}
-      <Box sx={{ py: 3, background: "#111", color: "#aaa" }}>
-        <Container>
-          <Typography textAlign="center" fontSize={14}>
-            © {new Date().getFullYear()} Shazli Ruhani Darsgah. All rights reserved.
-          </Typography>
-        </Container>
-      </Box>
+      <Footer />
     </>
   );
 }
