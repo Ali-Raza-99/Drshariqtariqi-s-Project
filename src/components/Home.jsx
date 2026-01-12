@@ -170,98 +170,103 @@ export default function HomePage() {
     await logout();
   };
 
+
+  // Show social icons for users and unlogged users on all pages
+  // For admin, show only on home page (location.pathname === "/")
+  const showSocialIcons = (!isAdmin) || (isAdmin && location.pathname === "/");
+
   return (
     <>
       <CssBaseline />
-
-      {/* FIXED SOCIAL ICONS */}
-      <Box
-        sx={{
-          position: "fixed",
-          left: 16,
-          bottom: 60,
-          zIndex: 1000,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        <IconButton
-          sx={{
-            width: 50,
-            height: 50,
-            bgcolor: "rgba(0, 0, 0, 0.7)",
-            backdropFilter: "blur(10px)",
-            border: "2px solid rgba(255, 255, 255, 0.3)",
-            color: "#fff",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              bgcolor: "rgba(255, 255, 255, 0.2)",
-              transform: "scale(1.05)",
-              boxShadow: "0 4px 20px rgba(255, 255, 255, 0.3)",
-            },
-            "&:hover ~ .social-icons": {
-              opacity: 1,
-              transform: "translateX(0)",
-              pointerEvents: "auto",
-            },
-          }}
-        >
-          <ShareIcon />
-        </IconButton>
-
+      {showSocialIcons && (
         <Box
-          className="social-icons"
           sx={{
+            position: "fixed",
+            left: 16,
+            bottom: 60,
+            zIndex: 1000,
             display: "flex",
             flexDirection: "row",
+            alignItems: "center",
             gap: 1,
-            opacity: 0,
-            transform: "translateX(-20px)",
-            pointerEvents: "none",
-            transition: "all 0.4s ease",
-            "&:hover": {
-              opacity: 1,
-              transform: "translateX(0)",
-              pointerEvents: "auto",
-            },
           }}
         >
-          {[
-            { icon: <FacebookIcon />, url: "https://facebook.com", label: "Facebook" },
-            { icon: <YouTubeIcon />, url: "https://youtube.com", label: "YouTube" },
-            { icon: <InstagramIcon />, url: "https://instagram.com", label: "Instagram" },
-            { icon: <TwitterIcon />, url: "https://twitter.com", label: "Twitter" },
-            { icon: <WhatsAppIcon />, url: "https://whatsapp.com", label: "WhatsApp" },
-          ].map((social) => (
-            <IconButton
-              key={social.label}
-              component="a"
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={social.label}
-              sx={{
-                width: 45,
-                height: 45,
-                bgcolor: "rgba(0, 0, 0, 0.6)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#fff",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  bgcolor: "rgba(255, 255, 255, 0.15)",
-                  transform: "translateY(-3px)",
-                  boxShadow: "0 4px 20px rgba(255, 255, 255, 0.2)",
-                },
-              }}
-            >
-              {social.icon}
-            </IconButton>
-          ))}
+          <IconButton
+            sx={{
+              width: 50,
+              height: 50,
+              bgcolor: "rgba(0, 0, 0, 0.7)",
+              backdropFilter: "blur(10px)",
+              border: "2px solid rgba(255, 255, 255, 0.3)",
+              color: "#fff",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                bgcolor: "rgba(255, 255, 255, 0.2)",
+                transform: "scale(1.05)",
+                boxShadow: "0 4px 20px rgba(255, 255, 255, 0.3)",
+              },
+              "&:hover ~ .social-icons": {
+                opacity: 1,
+                transform: "translateX(0)",
+                pointerEvents: "auto",
+              },
+            }}
+          >
+            <ShareIcon />
+          </IconButton>
+
+          <Box
+            className="social-icons"
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 1,
+              opacity: 0,
+              transform: "translateX(-20px)",
+              pointerEvents: "none",
+              transition: "all 0.4s ease",
+              "&:hover": {
+                opacity: 1,
+                transform: "translateX(0)",
+                pointerEvents: "auto",
+              },
+            }}
+          >
+            {[
+              { icon: <FacebookIcon />, url: "https://facebook.com", label: "Facebook" },
+              { icon: <YouTubeIcon />, url: "https://youtube.com", label: "YouTube" },
+              { icon: <InstagramIcon />, url: "https://instagram.com", label: "Instagram" },
+              { icon: <TwitterIcon />, url: "https://twitter.com", label: "Twitter" },
+              { icon: <WhatsAppIcon />, url: "https://whatsapp.com", label: "WhatsApp" },
+            ].map((social) => (
+              <IconButton
+                key={social.label}
+                component="a"
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                sx={{
+                  width: 45,
+                  height: 45,
+                  bgcolor: "rgba(0, 0, 0, 0.6)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  color: "#fff",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    bgcolor: "rgba(255, 255, 255, 0.15)",
+                    transform: "translateY(-3px)",
+                    boxShadow: "0 4px 20px rgba(255, 255, 255, 0.2)",
+                  },
+                }}
+              >
+                {social.icon}
+              </IconButton>
+            ))}
+          </Box>
         </Box>
-      </Box>
+      )}
 
       <Box
         sx={{
@@ -821,7 +826,7 @@ export default function HomePage() {
             <Grid item xs={12} sm={4} md={4}>
               <Box
                 component={RouterLink}
-                to="/appointment"
+                to={isAdmin ? "/admin/appointments/add" : "/appointment"}
                 sx={{
                   display: "flex",
                   flexDirection: "column",
@@ -879,7 +884,7 @@ export default function HomePage() {
             <Grid item xs={12} sm={4} md={4}>
               <Box
                 component={RouterLink}
-                to="/courses"
+                to={isAdmin ? "/admin/courses/add" : "/courses"}
                 sx={{
                   display: "flex",
                   flexDirection: "column",
@@ -937,7 +942,7 @@ export default function HomePage() {
             <Grid item xs={12} sm={4} md={4}>
               <Box
                 component={RouterLink}
-                to="/products"
+                to={isAdmin ? "/admin/products/add" : "/products"}
                 sx={{
                   display: "flex",
                   flexDirection: "column",

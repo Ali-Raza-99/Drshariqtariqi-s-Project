@@ -139,7 +139,7 @@ export default function Appointment() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${amliyatImg})`,
+          // backgroundImage: `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${amliyatImg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           py: { xs: 4, md: 6 },
@@ -182,10 +182,10 @@ export default function Appointment() {
                 )}
 
                 {/* BOX 1 */}
-                <Grid item xs={12}>
-                  <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,.15)", borderRadius: 2 }}>
+                <Grid size={12} item xs={12}>
+                  <Box sx={{ p: 2, borderRadius: 2,border: "1px solid rgba(255,255,255,.15)" }}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={12} sm={3}> 
+                      <Grid size={4}> 
                         <TextField
                           fullWidth
                           label="Name *"
@@ -196,7 +196,7 @@ export default function Appointment() {
                         />
                       </Grid>
 
-                      <Grid item xs={12} md={2}>
+                      <Grid size={4} item xs={12} md={2}>
                         <TextField
                           fullWidth
                           label="Father Name *"
@@ -207,7 +207,7 @@ export default function Appointment() {
                         />
                       </Grid>
 
-                      <Grid item xs={12} md={6}>
+                      <Grid size={4} item xs={12} md={6}>
                         <TextField
                           fullWidth
                           label="Email *"
@@ -222,10 +222,10 @@ export default function Appointment() {
                 </Grid>
 
                 {/* BOX 2 */}
-                <Grid item xs={12}>
+                <Grid size={12} item xs={12}>
                   <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,.15)", borderRadius: 2 }}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={4}>
+                      <Grid size={4} item xs={12} md={4}>
                         <FormControl fullWidth size="small">
                           <InputLabel sx={labelProps.sx}>Gender *</InputLabel>
                           <Select
@@ -240,7 +240,7 @@ export default function Appointment() {
                         </FormControl>
                       </Grid>
 
-                      <Grid item xs={12} md={4}>
+                      <Grid size={4} item xs={12} md={4}>
                         <TextField
                           fullWidth
                           label="Age *"
@@ -251,7 +251,7 @@ export default function Appointment() {
                         />
                       </Grid>
 
-                      <Grid item xs={12} md={4}>
+                      <Grid size={4} item xs={12} md={4}>
                         <FormControl fullWidth size="small">
                           <InputLabel sx={labelProps.sx}>Schedule *</InputLabel>
                           <Select
@@ -270,10 +270,10 @@ export default function Appointment() {
                 </Grid>
 
                 {/* BOX 3 */}
-                <Grid item xs={12}>
+                <Grid size={12} item xs={12}>
                   <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,.15)", borderRadius: 2 }}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
+                      <Grid size={4} item xs={12} md={6}>
                         <TextField
                           fullWidth
                           label="Contact *"
@@ -284,7 +284,7 @@ export default function Appointment() {
                         />
                       </Grid>
 
-                      <Grid item xs={12} md={6}>
+                      <Grid size={4} item xs={12} md={6}>
                         <TextField
                           fullWidth
                           label="City *"
@@ -294,42 +294,27 @@ export default function Appointment() {
                           onChange={(e) => handleInputChange("city", e.target.value)}
                         />
                       </Grid>
-                    </Grid>
-                  </Box>
-                </Grid>
-
-                {/* BOX 4 */}
-                <Grid item xs={12}>
-                  <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,.15)", borderRadius: 2 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
+                       <Grid size={4} item xs={12} md={6}>
                         <Button
+                        sx={{ height: 40 ,borderRadius: 2}}
                           fullWidth
                           component="label"
+                          size="small"
                           variant="outlined"
                           startIcon={<CloudUploadOutlinedIcon />}
                         >
-                          {paymentSlip ? paymentSlip.name : "Upload Payment Slip *"}
+                            {paymentSlip ? "Selected" : "Upload Payment Slip *"}
                           <input hidden type="file" onChange={handlePaymentSlipChange} />
                         </Button>
                       </Grid>
 
-                      <Grid item xs={12} md={6}>
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          startIcon={<AccountBalanceIcon />}
-                          onClick={() => setPaymentDialogOpen(true)}
-                        >
-                          View Payment Details
-                        </Button>
-                      </Grid>
                     </Grid>
                   </Box>
                 </Grid>
 
+
                 {/* BOX 5 */}
-                <Grid item xs={12}>
+                <Grid size={12} item xs={12}>
                   <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,.15)", borderRadius: 2 }}>
                     <TextField
                       fullWidth
@@ -345,16 +330,32 @@ export default function Appointment() {
                 </Grid>
 
                 {/* SUBMIT */}
-                <Grid item xs={12} md={4}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={handleSubmit}
-                    disabled={!isFormValid() || submitting}
-                    sx={{ height: 56, fontWeight: 900 }}
-                  >
-                    {submitting ? <CircularProgress size={24} /> : "Submit Appointment"}
-                  </Button>
+
+                <Grid size={12} item xs={12} md={4}>
+                  <Grid container spacing={2} direction="row">
+                    <Grid size={6} item xs={12} md={6}>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<AccountBalanceIcon />}
+                        onClick={() => setPaymentDialogOpen(true)}
+                        sx={{ height: 56 }}
+                      >
+                        View Payment Details
+                      </Button>
+                    </Grid>
+                    <Grid size={6} item xs={12} md={6}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        onClick={handleSubmit}
+                        disabled={!isFormValid() || submitting}
+                        sx={{ height: 56, fontWeight: 900 }}
+                      >
+                        {submitting ? <CircularProgress size={24} /> : "Submit Appointment"}
+                      </Button>
+                    </Grid>
+                  </Grid>
                 </Grid>
 
               </Grid>

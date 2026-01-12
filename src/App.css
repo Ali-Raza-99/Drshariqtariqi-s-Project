@@ -1,3 +1,68 @@
+/* Mureed Counter submit button white with hover */
+.mureed-submit-btn {
+  background: #888 !important;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+  transition: background 0.2s, color 0.2s;
+}
+.mureed-submit-btn:hover {
+  background: #444 !important;
+  color: #fff !important;
+  border: 1px solid #fff !important;
+}
+
+/* Mureed Counter select picture button transparent */
+.mureed-picture-btn {
+  background: transparent !important;
+  color: #fff !important;
+  border: 1.5px solid #fff !important;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.mureed-picture-btn:hover {
+  background: rgba(255,255,255,0.08) !important;
+  color: #fff !important;
+  border: 1.5px solid #fff !important;
+}
+
+/* Mureed Counter heading white */
+.mureed-heading {
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+/* Remove blue autofill, set hover and text color to white for all inputs in Mureed Counter */
+input, textarea, .MuiInputBase-root, .MuiOutlinedInput-root {
+  color: #fff !important;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #222 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #fff !important;
+}
+.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #fff !important;
+}
+.MuiButton-root, .MuiButtonBase-root, .MuiIconButton-root, .MuiButton-label {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+.MuiSvgIcon-root {
+  color: #fff !important;
+}
+/* Override for date input icon in Mureed Counter */
+.css-v370od-MuiButtonBase-root-MuiIconButton-root {
+  padding: 34px !important;
+}
 #root {
   width: 100%;
   height: 100%;
