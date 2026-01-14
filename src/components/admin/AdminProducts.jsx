@@ -543,8 +543,8 @@ export default function AdminProducts() {
                 backdropFilter: "blur(12px)",
               }}
             >
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6} md={3}>
+              <Grid size={12} container spacing={3}>
+                <Grid size={3} item xs={12} sm={6} md={3}>
                   <TextField
                     label="Product Name"
                     fullWidth
@@ -575,7 +575,7 @@ export default function AdminProducts() {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={2} item xs={12} sm={6} md={3}>
                   <TextField
                     label="Price (Rs.)"
                     fullWidth
@@ -608,7 +608,7 @@ export default function AdminProducts() {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={2} item xs={12} sm={6} md={3}>
                   <TextField
                     label="Quantity"
                     fullWidth
@@ -639,7 +639,7 @@ export default function AdminProducts() {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={3} item xs={12} sm={6} md={3}>
                   <Button
                     component="label"
                     fullWidth
@@ -666,7 +666,7 @@ export default function AdminProducts() {
                     }}
                   >
                     {adminImageFile
-                      ? `✓ ${adminImageFile.name}`
+                      ? "✓ Selected"
                       : isEditing && adminImageUrl
                       ? "Change Product Image"
                       : "Upload Product Image"}
@@ -687,7 +687,7 @@ export default function AdminProducts() {
                   </Grid>
                 )}
 
-                <Grid item xs={12} sm={6} md={5}>
+                <Grid size={2} item xs={12} sm={6} md={5}>
                   <Button
                     variant="contained"
                     onClick={handleAdminSave}
@@ -927,7 +927,8 @@ export default function AdminProducts() {
                                       width: 36,
                                       height: 36,
                                       "&:hover": {
-                                        bgcolor: "white",
+                                        bgcolor: "#1976d2",
+                                        color: "white",
                                         transform: "scale(1.1)",
                                       },
                                       transition: "all 0.2s ease",
@@ -947,7 +948,7 @@ export default function AdminProducts() {
                                       width: 36,
                                       height: 36,
                                       "&:hover": {
-                                        bgcolor: "#ff4444",
+                                        bgcolor: "#d32f2f",
                                         color: "white",
                                         transform: "scale(1.1)",
                                       },

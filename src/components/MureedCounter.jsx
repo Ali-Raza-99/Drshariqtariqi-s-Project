@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import {
   Box,
@@ -14,10 +14,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import SocialMediaIcons from "./SocialMediaIcons";
 import SitePage from "./layout/SitePage";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase/firestore";
-import { uploadToFolderAndGetUrl } from "../firebase/storage";
+import { uploadToCloudinaryUnsigned } from "../utils/cloudinaryUpload";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { registerMureed } from "../firebase/firestore";
 import LoginFirstDialog from "./auth/LoginFirstDialog";
@@ -35,6 +36,22 @@ function MureedCounter() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+    useEffect(() => {
+      if (successMsg) {
+        const timer = setTimeout(() => setSuccessMsg("") , 3500);
+        return () => clearTimeout(timer);
+      }
+    }, [successMsg]);
+  const [errorMsg, setErrorMsg] = useState("");
+  const { currentUser } = useAuth();
+
+  // Check if all fields are filled
+  const isFormFilled = Object.entries(form).every(([key, value]) => {
+    if (key === 'picture') return true; // picture is optional
+    return value && String(value).trim() !== '';
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,16 +74,30 @@ function MureedCounter() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!currentUser) {
+      setLoginDialogOpen(true);
+      return;
+    }
+    if (!isFormFilled) return;
     setSubmitting(true);
+    setSuccessMsg("");
+    setErrorMsg("");
     try {
-      // Prepare data for Firestore (convert date to string if needed)
+      let uploadedPhotoURL = '';
+      if (form.picture) {
+        uploadedPhotoURL = await uploadToCloudinaryUnsigned(form.picture);
+      }
       const dataToSend = {
         ...form,
         dob: form.dob ? (typeof form.dob === 'string' ? form.dob : form.dob.format ? form.dob.format('YYYY-MM-DD') : form.dob.toString()) : '',
-        picture: undefined, // Don't send file directly
+        pictureUrl: uploadedPhotoURL,
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        userPhotoURL: currentUser.photoURL || uploadedPhotoURL,
+        createdAt: new Date().toISOString(),
       };
+      delete dataToSend.picture;
       await registerMureed({ data: dataToSend });
-      // Optionally reset form or show success
       setForm({
         name: '',
         fatherName: '',
@@ -78,9 +109,9 @@ function MureedCounter() {
         picture: null,
       });
       setPreview(null);
-      // Optionally show a success message
+      setSuccessMsg("Your request has been submitted.");
     } catch (err) {
-      // Optionally show an error message
+      setErrorMsg(err?.message || 'Error uploading mureed.');
       console.error('Error uploading mureed:', err);
     }
     setSubmitting(false);
@@ -88,13 +119,14 @@ function MureedCounter() {
 
   return (
     <SitePage>
+      <LoginFirstDialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)} />
       <Box sx={{ width: '100%', pt: { xs: 4, md: 6 } }}>
-        <Typography
-          variant="h3"
-          sx={{ textAlign: 'center', color: '#fff', mb: 0, fontWeight: 900 }}
-        >
-          Mureed Registry
-        </Typography>
+         <Typography
+           variant="h3"
+           sx={{ textAlign: 'center', color: '#fff', mb: 1, fontWeight: 900 }}
+         >
+           Mureed Registry
+         </Typography>
         <Box
           sx={{
             display: 'flex',
@@ -119,6 +151,42 @@ function MureedCounter() {
               border: 'none',
             }}
           >
+            {successMsg && (
+                 <Box
+                   mb={2}
+                   sx={{
+                     background: 'rgba(60,60,60,0.45)',
+                     color: '#43a047',
+                     p: 2,
+                     borderRadius: 2,
+                     textAlign: 'center',
+                     fontWeight: 600,
+                     border: '1px solid rgba(67,160,71,0.25)',
+                     boxShadow: '0 2px 8px 0 rgba(60,60,60,0.10)',
+                     backdropFilter: 'blur(2px)',
+                   }}
+                 >
+                   {successMsg}
+                 </Box>
+               )}
+               {errorMsg && (
+                 <Box
+                   mb={2}
+                   sx={{
+                     background: 'rgba(60,60,60,0.45)',
+                     color: '#e53935',
+                     p: 2,
+                     borderRadius: 2,
+                     textAlign: 'center',
+                     fontWeight: 600,
+                     border: '1px solid rgba(229,57,53,0.25)',
+                     boxShadow: '0 2px 8px 0 rgba(60,60,60,0.10)',
+                     backdropFilter: 'blur(2px)',
+                   }}
+                 >
+                   {errorMsg}
+                 </Box>
+               )}
             <Grid container spacing={2} direction="row">
               {/* First Row: Name, Father Name, Contact */}
               <Grid size={12} item xs={12}>
@@ -236,7 +304,7 @@ function MureedCounter() {
                         fontWeight: 700,
                         boxShadow: 2,
                       }}
-                      disabled={submitting}
+                      disabled={submitting || !isFormFilled || !currentUser}
                     >
                       {submitting ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
                     </Button>
@@ -251,5 +319,6 @@ function MureedCounter() {
   );
 }
 
+  <SocialMediaIcons />
 export default MureedCounter;
 

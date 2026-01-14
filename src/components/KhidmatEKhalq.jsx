@@ -24,6 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import SocialMediaIcons from "./SocialMediaIcons";
 import Footer from "./layout/Footer";
 
 import logoImg from "../assets/logo.jpeg";
@@ -34,12 +35,14 @@ import powderImg from "../assets/powder.jpeg";
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile } from "../firebase/firestore";
 import { getNavTo, isNavItemActive, navItems } from "./layout/navConfig";
+import slide5Img from "../assets/5.png";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
 });
 
 export default function IjmiatiQurbani() {
+	// ...existing code...
 	const { currentUser, authLoading, logout } = useAuth();
 	const location = useLocation();
 
@@ -525,12 +528,21 @@ export default function IjmiatiQurbani() {
 			</AppBar>
 
 			{/* PAGE CONTENT */}
-			<Box sx={{ minHeight: "100vh", bgcolor: "#000", color: "#fff", pt: { xs: 10, md: 12 } }}>
+			<Box
+				sx={{
+					minHeight: "100vh",
+					color: "#fff",
+					pt: { xs: 10, md: 12 },
+					backgroundColor: "#fff",
+					backgroundImage: `url(${slide5Img})`,
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+					backgroundRepeat: "no-repeat",
+					backgroundAttachment: "fixed",
+				}}
+			>
 				<Container maxWidth="md">
 					<Stack spacing={2.5} sx={{ py: { xs: 4, md: 6 } }}>
-						<Box sx={{ mt: { xs: 1, md: 2 } }}>
-							<Box component="img" src={amliyatImg} alt="Khidmat e Khalq" sx={{ width: "100%", borderRadius: 2 }} />
-						</Box>
 						<Typography variant="h4" fontWeight={900}>
 							Khidmat e Khalq
 						</Typography>
@@ -578,6 +590,7 @@ export default function IjmiatiQurbani() {
 					</Stack>
 				</Container>
 
+				<SocialMediaIcons />
 				<Footer />
 			</Box>
 		</>

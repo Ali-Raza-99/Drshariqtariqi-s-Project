@@ -227,7 +227,7 @@ export default function Signup() {
 						Create your account to continue.
 					</Typography>
 					{submitError ? (
-						<Typography sx={{ mb: 2, color: "error.main" }} textAlign="center">
+						<Typography sx={{ mb: 2, color: "error.main",color:'#d53c3c !important' }} textAlign="center">
 							{submitError}
 						</Typography>
 					) : null}
@@ -296,6 +296,7 @@ export default function Signup() {
 									required
 									error={submitAttempted && !isNonEmpty(formData.password)}
 									helperText={submitAttempted && !isNonEmpty(formData.password) ? "Required" : ""}
+									FormHelperTextProps={{ sx: { color: 'red' } }}
 									InputProps={{
 										endAdornment: (
 											<InputAdornment position="end">
@@ -332,6 +333,7 @@ export default function Signup() {
 											required: true,
 											error: submitAttempted && !formData.dateOfBirth,
 											helperText: submitAttempted && !formData.dateOfBirth ? "Required" : "",
+											FormHelperTextProps: { sx: { color: 'red' } },
 									},
 								}}
 								/>
@@ -522,8 +524,8 @@ export default function Signup() {
 										fontSize: 15,
 										fontWeight: 700,
 										bgcolor: "#fff",
-										color: "#111",
-										"&:hover": { bgcolor: "grey.800", color: "#fff" },
+										color: "#393737 !important",
+										"&:hover": { bgcolor: "#7b7777 !important", color: "#fff !important" },
 										"&.Mui-disabled": {
 											bgcolor: "rgba(255, 255, 255, 0.35)",
 											color: "rgba(0, 0, 0, 0.45)",

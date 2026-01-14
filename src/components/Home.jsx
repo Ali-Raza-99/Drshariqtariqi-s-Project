@@ -3,9 +3,7 @@ import {
   AppBar,
   Badge,
   Divider,
-  Dialog,
   IconButton,
-  Slide,
   Stack,
   Toolbar,
   Typography,
@@ -35,6 +33,8 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import ShareIcon from "@mui/icons-material/Share";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import CartQuantityControl from "./cart/CartQuantityControl";
+import CartDialog from "./cart/CartDialog";
+import CartNavbarIcon from "./cart/CartNavbarIcon";
 
 import slide1Img from "../assets/1.png";
 import slide5Img from "../assets/5.png";
@@ -48,9 +48,7 @@ import { getUserProfile } from "../firebase/firestore";
 import { getNavItems, getNavTo, isNavItemActive } from "./layout/navConfig";
 import Footer from "./layout/Footer";
 
-const CartTransition = React.forwardRef(function CartTransition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+// CartTransition removed, handled in CartDialog
 
 const sliderItems = [
   {
@@ -406,37 +404,7 @@ export default function HomePage() {
                 ) : (
                   <>
                     {adminChecked && !isAdmin && (
-                      <IconButton
-                        onClick={() => setCartOpen(true)}
-                        sx={{
-                          color: "white",
-                          mr: 1,
-                          borderRadius: 3,
-                          border: "1px solid rgba(255,255,255,0.18)",
-                          backgroundColor: "rgba(255,255,255,0.06)",
-                          backdropFilter: "blur(8px)",
-                          transition: "transform 180ms ease, background-color 220ms ease",
-                          "&:hover": {
-                            backgroundColor: "rgba(255,255,255,0.10)",
-                            transform: "translateY(-1px)",
-                          },
-                          "&:active": { transform: "translateY(0px) scale(0.98)" },
-                        }}
-                        aria-label="Open cart"
-                      >
-                        <Badge
-                          badgeContent={totalItems}
-                          color="error"
-                          overlap="circular"
-                          sx={{
-                            "& .MuiBadge-badge": {
-                              border: "1px solid rgba(0,0,0,0.35)",
-                            },
-                          }}
-                        >
-                          <ShoppingCartOutlinedIcon />
-                        </Badge>
-                      </IconButton>
+                      <CartNavbarIcon totalItems={totalItems} onClick={() => setCartOpen(true)} />
                     )}
 
                     <IconButton
@@ -465,167 +433,16 @@ export default function HomePage() {
                     </Menu>
 
                     {adminChecked && !isAdmin && (
-                      <Dialog
+                      <CartDialog
                         open={cartOpen}
                         onClose={() => setCartOpen(false)}
-                        fullWidth
-                        maxWidth="sm"
-                        TransitionComponent={CartTransition}
-                        transitionDuration={{ enter: 260, exit: 220 }}
-                        PaperProps={{
-                          sx: {
-                            bgcolor: "rgba(15, 15, 15, 0.92)",
-                            border: "1px solid rgba(255, 255, 255, 0.14)",
-                            borderRadius: 3,
-                            boxShadow: "0 20px 70px rgba(0,0,0,0.65)",
-                            backdropFilter: "blur(14px)",
-                            color: "#fff",
-                            overflow: "hidden",
-                          },
-                        }}
-                      >
-                      <Box
-                        sx={{
-                          px: 2.25,
-                          py: 1.75,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: 1,
-                        }}
-                      >
-                        <Box>
-                          <Typography variant="h6" fontWeight={800} sx={{ lineHeight: 1.1 }}>
-                            Your Cart
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ opacity: 0.7, fontSize: 13, mt: 0.25 }}
-                          >
-                            {totalItems > 0
-                              ? `${totalItems} item${totalItems === 1 ? "" : "s"} selected`
-                              : "No items selected yet"}
-                          </Typography>
-                        </Box>
-
-                        <IconButton
-                          onClick={() => setCartOpen(false)}
-                          sx={{ color: "rgba(255,255,255,0.85)" }}
-                          aria-label="Close cart"
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Box>
-
-                      <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
-
-                      <Box sx={{ px: 2.25, py: 2 }}>
-                        <Stack spacing={1.5}>
-                          {cartProducts.map((p) => {
-                            const qty = cartQty[p.id] ?? 0;
-                            const lineTotal = qty * p.price;
-                            return (
-                              <Box
-                                key={p.id}
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1.25,
-                                  p: 1.25,
-                                  borderRadius: 2,
-                                  border: "1px solid rgba(255,255,255,0.12)",
-                                  bgcolor: "rgba(255,255,255,0.04)",
-                                }}
-                              >
-                                <Box
-                                  component="img"
-                                  src={p.image}
-                                  alt={p.name}
-                                  sx={{
-                                    width: 54,
-                                    height: 54,
-                                    borderRadius: 2,
-                                    objectFit: "cover",
-                                    border: "1px solid rgba(255,255,255,0.10)",
-                                  }}
-                                />
-
-                                <Box sx={{ flex: 1, minWidth: 0 }}>
-                                  <Typography fontWeight={800} sx={{ lineHeight: 1.15 }}>
-                                    {p.name}
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ opacity: 0.7, fontSize: 13, mt: 0.25 }}>
-                                    Rs. {p.price}
-                                  </Typography>
-                                </Box>
-
-                                <CartQuantityControl
-                                  quantity={qty}
-                                  onIncrease={() => incCart(p.id)}
-                                  onDecrease={() => decCart(p.id)}
-                                  maxQuantity={99}
-                                  productName={p.name}
-                                />
-
-                                <Box sx={{ width: 92, textAlign: "right" }}>
-                                  <Typography fontWeight={900} sx={{ lineHeight: 1.15 }}>
-                                    Rs. {lineTotal}
-                                  </Typography>
-                                  <Typography variant="caption" sx={{ opacity: 0.65 }}>
-                                    Subtotal
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            );
-                          })}
-                        </Stack>
-
-                        <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.12)" }} />
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "flex-start",
-                            justifyContent: "space-between",
-                            gap: 2,
-                          }}
-                        >
-                          <Box sx={{ flex: 1 }}>
-                            <Typography fontWeight={900} sx={{ mb: 0.75 }}>
-                              Order Summary
-                            </Typography>
-                            {totalItems === 0 ? (
-                              <Typography variant="body2" sx={{ opacity: 0.7, fontSize: 13 }}>
-                                Add items using + to see summary.
-                              </Typography>
-                            ) : (
-                              <Stack spacing={0.4}>
-                                {cartProducts
-                                  .filter((p) => (cartQty[p.id] ?? 0) > 0)
-                                  .map((p) => (
-                                    <Typography
-                                      key={`summary-${p.id}`}
-                                      variant="body2"
-                                      sx={{ opacity: 0.85, fontSize: 13 }}
-                                    >
-                                      {p.name} × {cartQty[p.id]} = Rs. {(cartQty[p.id] ?? 0) * p.price}
-                                    </Typography>
-                                  ))}
-                              </Stack>
-                            )}
-                          </Box>
-
-                          <Box sx={{ textAlign: "right" }}>
-                            <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                              Total
-                            </Typography>
-                            <Typography variant="h6" fontWeight={1000} sx={{ lineHeight: 1.1 }}>
-                              Rs. {totalAmount}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                      </Dialog>
+                        cartProducts={cartProducts}
+                        cartQty={cartQty}
+                        incCart={incCart}
+                        decCart={decCart}
+                        totalItems={totalItems}
+                        totalAmount={totalAmount}
+                      />
                     )}
                   </>
                 )}

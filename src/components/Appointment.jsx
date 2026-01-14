@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+// Remove blue autofill background for address field
+import '../App.css';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import LoginFirstDialog from "./auth/LoginFirstDialog";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "../firebase/firestore";
 import {
   Box,
   Button,
@@ -26,11 +32,14 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CloseIcon from "@mui/icons-material/Close";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import SocialMediaIcons from "./SocialMediaIcons";
 import SitePage from "./layout/SitePage";
 import { uploadToCloudinaryUnsigned } from "../utils/cloudinaryUpload";
 import amliyatImg from "../assets/amliyat.jpg";
 
 export default function Appointment() {
+  // ...existing code...
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     fatherName: "",
@@ -40,14 +49,14 @@ export default function Appointment() {
     contact: "",
     address: "",
     city: "",
-    schedule: "",
   });
 
   const [appointmentDate, setAppointmentDate] = useState(null);
   const [paymentSlip, setPaymentSlip] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
   const weekdays = [
@@ -62,17 +71,20 @@ export default function Appointment() {
 
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
-      minHeight: 40,
+      minHeight: 34,
       bgcolor: "rgba(17,17,17,0.35)",
-      borderRadius: 2,
+      borderRadius: 1,
       "& fieldset": {
         borderColor: "rgba(255,255,255,0.22)",
+        borderRadius: 1,
       },
       "&:hover fieldset": {
         borderColor: "rgba(255,255,255,0.35)",
+        borderRadius: 1,
       },
       "&.Mui-focused fieldset": {
         borderColor: "rgba(255,255,255,0.5)",
+        borderRadius: 1,
       },
     },
     "& .MuiInputBase-input": {
@@ -100,39 +112,76 @@ export default function Appointment() {
     setPaymentSlip(file);
   };
 
-  const isFormValid = () =>
-    formData.name &&
-    formData.fatherName &&
-    formData.email &&
-    formData.gender &&
-    formData.age &&
-    formData.contact &&
-    formData.address &&
-    formData.city &&
-    formData.schedule &&
-    appointmentDate &&
-    paymentSlip;
+  const isFormValid = () => {
+    return (
+      formData.name &&
+      formData.fatherName &&
+      formData.email &&
+      formData.gender &&
+      formData.age &&
+      formData.contact &&
+      formData.address &&
+      formData.city &&
+      appointmentDate !== null && appointmentDate !== '' &&
+      paymentSlip !== null
+    );
+  };
 
   const handleSubmit = async () => {
+    setError("");
+    setSuccessMsg("");
+    if (!currentUser) {
+      setLoginDialogOpen(true);
+      return;
+    }
     if (!isFormValid()) {
       setError("Please fill all fields and upload payment slip");
       return;
     }
-
     setSubmitting(true);
-    setError("");
-
     try {
-      await uploadToCloudinaryUnsigned(paymentSlip);
-      await new Promise((r) => setTimeout(r, 2000));
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 5000);
-    } catch {
-      setError("Submission failed. Try again.");
-    } finally {
-      setSubmitting(false);
+      // Upload payment slip to Cloudinary
+      let paymentSlipUrl = "";
+      if (paymentSlip) {
+        paymentSlipUrl = await uploadToCloudinaryUnsigned(paymentSlip);
+      }
+      // Prepare data
+      const dataToSend = {
+        ...formData,
+        appointmentDate: appointmentDate ? (typeof appointmentDate === 'string' ? appointmentDate : appointmentDate.format ? appointmentDate.format('YYYY-MM-DD') : appointmentDate.toString()) : '',
+        paymentSlipUrl,
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        userPhotoURL: currentUser.photoURL || '',
+        createdAt: new Date().toISOString(),
+      };
+      // Save to Firestore
+      await addDoc(collection(db, "Appointment"), dataToSend);
+      setSuccessMsg("Your request has been submitted.");
+      setFormData({
+        name: "",
+        fatherName: "",
+        email: "",
+        gender: "",
+        age: "",
+        contact: "",
+        address: "",
+        city: "",
+      });
+      setAppointmentDate(null);
+      setPaymentSlip(null);
+    } catch (err) {
+      setError(err?.message || "Submission failed. Try again.");
     }
+    setSubmitting(false);
   };
+
+  useEffect(() => {
+    if (successMsg) {
+      const timer = setTimeout(() => setSuccessMsg("") , 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [successMsg]);
 
   return (
     <SitePage>
@@ -165,21 +214,47 @@ export default function Appointment() {
               <Grid container spacing={3}>
 
                 {/* Alerts */}
-                {success && (
+                {successMsg && (
                   <Grid item xs={12}>
-                    <Alert severity="success" icon={<CheckCircleOutlineIcon />}>
-                      Appointment booked successfully!
-                    </Alert>
+                    <Box
+                      mb={2}
+                      sx={{
+                        background: 'rgba(60,60,60,0.45)',
+                        color: '#43a047',
+                        p: 2,
+                        borderRadius: 2,
+                        textAlign: 'center',
+                        fontWeight: 600,
+                        border: '1px solid rgba(67,160,71,0.25)',
+                        boxShadow: '0 2px 8px 0 rgba(60,60,60,0.10)',
+                        backdropFilter: 'blur(2px)',
+                      }}
+                    >
+                      {successMsg}
+                    </Box>
                   </Grid>
                 )}
-
                 {error && (
                   <Grid item xs={12}>
-                    <Alert severity="error" icon={<ErrorOutlineIcon />}>
+                    <Box
+                      mb={2}
+                      sx={{
+                        background: 'rgba(60,60,60,0.45)',
+                        color: '#e53935',
+                        p: 2,
+                        borderRadius: 2,
+                        textAlign: 'center',
+                        fontWeight: 600,
+                        border: '1px solid rgba(229,57,53,0.25)',
+                        boxShadow: '0 2px 8px 0 rgba(60,60,60,0.10)',
+                        backdropFilter: 'blur(2px)',
+                      }}
+                    >
                       {error}
-                    </Alert>
+                    </Box>
                   </Grid>
                 )}
+  <LoginFirstDialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)} />
 
                 {/* BOX 1 */}
                 <Grid size={12} item xs={12}>
@@ -230,7 +305,7 @@ export default function Appointment() {
                           <InputLabel sx={labelProps.sx}>Gender *</InputLabel>
                           <Select
                             label="Gender *"
-                            sx={fieldSx}
+                            sx={{ height: 40, borderRadius: 1, ...fieldSx }}
                             onChange={(e) => handleInputChange("gender", e.target.value)}
                           >
                             <MenuItem value="Male">Male</MenuItem>
@@ -240,30 +315,43 @@ export default function Appointment() {
                         </FormControl>
                       </Grid>
 
-                      <Grid size={4} item xs={12} md={4}>
-                        <TextField
-                          fullWidth
-                          label="Age *"
-                          size="small"
-                          sx={fieldSx}
-                          InputLabelProps={labelProps}
-                          onChange={(e) => handleInputChange("age", e.target.value)}
-                        />
+                      {/* Appointment Date Field */}
+                      <Grid size={4}  item xs={12} md={4}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker 
+                            label="Appointment Date *"
+                            value={appointmentDate}
+                            onChange={(newValue) => setAppointmentDate(newValue)}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                size: "small",
+                                sx: { ...fieldSx, '& .MuiOutlinedInput-root, & .MuiOutlinedInput-notchedOutline, & .dateFieldOfAppointment': { borderRadius: 2 } },
+                                InputLabelProps: labelProps,
+                              },
+                            }}
+                          />
+                        </LocalizationProvider>
                       </Grid>
 
+                      {/* Age Date Field */}
                       <Grid size={4} item xs={12} md={4}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel sx={labelProps.sx}>Schedule *</InputLabel>
-                          <Select
-                            label="Schedule *"
-                            sx={fieldSx}
-                            onChange={(e) => handleInputChange("schedule", e.target.value)}
-                          >
-                            {weekdays.map((d) => (
-                              <MenuItem key={d} value={d}>{d}</MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            label="Date of Birth (Age) *"
+                            value={formData.age ? dayjs(formData.age) : null}
+                            onChange={(newValue) => handleInputChange("age", newValue ? newValue.format('YYYY-MM-DD') : "")}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                size: "small",
+                                sx: { ...fieldSx, '& .MuiOutlinedInput-root, & .MuiOutlinedInput-notchedOutline, & .dateFieldOfAppointment': { borderRadius: 16 } },
+                                InputLabelProps: labelProps,
+                                className: "ar"
+                              },
+                            }}
+                          />
+                        </LocalizationProvider>
                       </Grid>
                     </Grid>
                   </Box>
@@ -296,7 +384,7 @@ export default function Appointment() {
                       </Grid>
                        <Grid size={4} item xs={12} md={6}>
                         <Button
-                        sx={{ height: 40 ,borderRadius: 2}}
+                        sx={{ height: 40, borderRadius: 1 }}
                           fullWidth
                           component="label"
                           size="small"
@@ -316,16 +404,17 @@ export default function Appointment() {
                 {/* BOX 5 */}
                 <Grid size={12} item xs={12}>
                   <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,.15)", borderRadius: 2 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      label="Address *"
-                      size="small"
-                      sx={fieldSx}
-                      InputLabelProps={labelProps}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
-                    />
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={3}
+                          label="Address *"
+                          size="small"
+                          sx={fieldSx}
+                          InputLabelProps={labelProps}
+                          value={formData.address}
+                          onChange={(e) => handleInputChange("address", e.target.value)}
+                        />
                   </Box>
                 </Grid>
 
@@ -350,9 +439,9 @@ export default function Appointment() {
                         variant="contained"
                         onClick={handleSubmit}
                         disabled={!isFormValid() || submitting}
-                        sx={{ height: 56, fontWeight: 900 }}
+                        sx={{ height: 56, fontWeight: 900,backgroundColor: "#7e7e7e",color: "#000", "&:hover": {backgroundColor: "#f5f5f5",color:"#4e4e4e !important"}, }}
                       >
-                        {submitting ? <CircularProgress size={24} /> : "Submit Appointment"}
+                        {submitting ? <CircularProgress size={24} /> : "Submit"}
                       </Button>
                     </Grid>
                   </Grid>
@@ -486,11 +575,11 @@ export default function Appointment() {
       onClick={() => setPaymentDialogOpen(false)}
       variant="contained"
       sx={{
-        bgcolor: "#fff",
-        color: "#000",
+        bgcolor: "#8e8b8b",
+      color: "#f4ecec !important",
         fontWeight: 700,
         textTransform: "none",
-        "&:hover": { bgcolor: "rgba(255,255,255,0.9)" },
+        "&:hover": {color:"#4e4e4e !important", bgcolor: "rgba(255,255,255,0.9)" },
       }}
     >
       Got it
@@ -498,7 +587,8 @@ export default function Appointment() {
   </DialogActions>
 </Dialog>
 
-      </Box>
-    </SitePage>
+      <SocialMediaIcons />
+    </Box>
+  </SitePage>
   );
 }

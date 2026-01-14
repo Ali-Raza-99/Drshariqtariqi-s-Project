@@ -26,6 +26,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import SocialMediaIcons from "./SocialMediaIcons";
 import Footer from "./layout/Footer";
 
 import bgImg from "../assets/5.png";
@@ -37,9 +38,11 @@ import {
   getUserProfile,
   listCourses,
 } from "../firebase/firestore";
+import ThemedLoadingSpinner from "./ThemedLoadingSpinner";
 
 
 export default function Courses() {
+  // ...existing code...
   const { currentUser, authLoading, logout } = useAuth();
   const location = useLocation();
   const theme = useTheme();
@@ -397,142 +400,146 @@ export default function Courses() {
               </Grid>
             </Grid>
 
-            <Box
-              sx={{
-                mt: 4,
-                position: "relative",
-                borderRadius: 4,
-                border: "1px solid rgba(255,255,255,0.18)",
-                backgroundColor: "rgba(0,0,0,0.22)",
-                backdropFilter: "blur(8px)",
-                p: { xs: 2, md: 2.5 },
-                overflow: "hidden",
-                "--pv": coursesPerView,
-                "--cardGap": { xs: "16px", md: "24px" },
-              }}
-              >
-              <IconButton
-                aria-label="Previous courses"
-                onClick={goPrevCourse}
-                disabled={courseStartIndex === 0}
+            {loadingCourses ? (
+              <ThemedLoadingSpinner />
+            ) : (
+              <Box
                 sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: 10,
-                  transform: "translateY(-50%)",
-                  color: "white",
-                  backgroundColor: "rgba(0,0,0,0.35)",
-                  backdropFilter: "blur(6px)",
-                  "&:hover": { backgroundColor: "rgba(0,0,0,0.55)" },
-                  "&.Mui-disabled": { color: "rgba(255,255,255,0.35)" },
-                  zIndex: 2,
+                  mt: 4,
+                  position: "relative",
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  backgroundColor: "rgba(0,0,0,0.22)",
+                  backdropFilter: "blur(8px)",
+                  p: { xs: 2, md: 2.5 },
+                  overflow: "hidden",
+                  "--pv": coursesPerView,
+                  "--cardGap": { xs: "16px", md: "24px" },
                 }}
               >
-                <ChevronLeftIcon />
-              </IconButton>
-
-              <IconButton
-                aria-label="Next courses"
-                onClick={goNextCourse}
-                disabled={courseStartIndex >= maxStartIndex}
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  right: 10,
-                  transform: "translateY(-50%)",
-                  color: "white",
-                  backgroundColor: "rgba(0,0,0,0.35)",
-                  backdropFilter: "blur(6px)",
-                  "&:hover": { backgroundColor: "rgba(0,0,0,0.55)" },
-                  "&.Mui-disabled": { color: "rgba(255,255,255,0.35)" },
-                  zIndex: 2,
-                }}
-              >
-                <ChevronRightIcon />
-              </IconButton>
-
-              <Box sx={{ px: { xs: 4, md: 6 } }}>
-                <Box ref={courseViewportRef} sx={{ overflow: "hidden" }}>
-                  <Box
-                    ref={courseTrackRef}
-                    sx={{
-                      display: "flex",
-                      gap: "var(--cardGap)",
-                      transform: `translate3d(-${translateX}px, 0, 0)`,
-                      transition:
-                        "transform 820ms cubic-bezier(0.22, 1, 0.36, 1)",
-                      willChange: "transform",
-                    }}
-                  >
-                  {courses.map((course) => {
-                    return (
-                      <Box
-                        key={course.id}
-                        data-carousel-item="true"
-                        sx={{
-                          flex: courseItemWidthPx
-                            ? `0 0 ${courseItemWidthPx}px`
-                            : "0 0 calc((100% - (var(--cardGap) * (var(--pv) - 1))) / var(--pv))",
-                          width: courseItemWidthPx ? `${courseItemWidthPx}px` : undefined,
-                          minWidth: 0,
-                        }}
-                      >
-                        <CourseCard
-                          image={course.imageUrl ?? course.image}
-                          name={course.name}
-                          price={course.price}
-                          onViewDetails={() => openDetailsDialog(course)}
-                        />
-                      </Box>
-                    );
-                  })}
-                  </Box>
-                </Box>
-              </Box>
-
-              {maxStartIndex > 0 && (
-                <Box
+                <IconButton
+                  aria-label="Previous courses"
+                  onClick={goPrevCourse}
+                  disabled={courseStartIndex === 0}
                   sx={{
-                    mt: 2,
-                    display: "flex",
-                    justifyContent: "center",
+                    position: "absolute",
+                    top: "50%",
+                    left: 10,
+                    transform: "translateY(-50%)",
+                    color: "white",
+                    backgroundColor: "rgba(0,0,0,0.35)",
+                    backdropFilter: "blur(6px)",
+                    "&:hover": { backgroundColor: "rgba(0,0,0,0.55)" },
+                    "&.Mui-disabled": { color: "rgba(255,255,255,0.35)" },
+                    zIndex: 2,
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 0.75,
-                      px: 1.25,
-                      py: 0.75,
-                      borderRadius: 999,
-                      backgroundColor: "rgba(0,0,0,0.30)",
-                      backdropFilter: "blur(6px)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                    }}
-                  >
-                    {Array.from({ length: maxStartIndex + 1 }).map((_, index) => (
-                      <Box
-                        key={index}
-                        onClick={() => setCourseStartIndex(index)}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Go to course position ${index + 1}`}
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          cursor: "pointer",
-                          backgroundColor:
-                            index === courseStartIndex
-                              ? "rgba(255,255,255,0.95)"
-                              : "rgba(255,255,255,0.55)",
-                        }}
-                      />
-                    ))}
+                  <ChevronLeftIcon />
+                </IconButton>
+
+                <IconButton
+                  aria-label="Next courses"
+                  onClick={goNextCourse}
+                  disabled={courseStartIndex >= maxStartIndex}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    right: 10,
+                    transform: "translateY(-50%)",
+                    color: "white",
+                    backgroundColor: "rgba(0,0,0,0.35)",
+                    backdropFilter: "blur(6px)",
+                    "&:hover": { backgroundColor: "rgba(0,0,0,0.55)" },
+                    "&.Mui-disabled": { color: "rgba(255,255,255,0.35)" },
+                    zIndex: 2,
+                  }}
+                >
+                  <ChevronRightIcon />
+                </IconButton>
+
+                <Box sx={{ px: { xs: 4, md: 6 } }}>
+                  <Box ref={courseViewportRef} sx={{ overflow: "hidden" }}>
+                    <Box
+                      ref={courseTrackRef}
+                      sx={{
+                        display: "flex",
+                        gap: "var(--cardGap)",
+                        transform: `translate3d(-${translateX}px, 0, 0)`,
+                        transition:
+                          "transform 820ms cubic-bezier(0.22, 1, 0.36, 1)",
+                        willChange: "transform",
+                      }}
+                    >
+                    {courses.map((course) => {
+                      return (
+                        <Box
+                          key={course.id}
+                          data-carousel-item="true"
+                          sx={{
+                            flex: courseItemWidthPx
+                              ? `0 0 ${courseItemWidthPx}px`
+                              : "0 0 calc((100% - (var(--cardGap) * (var(--pv) - 1))) / var(--pv))",
+                            width: courseItemWidthPx ? `${courseItemWidthPx}px` : undefined,
+                            minWidth: 0,
+                          }}
+                        >
+                          <CourseCard
+                            image={course.imageUrl ?? course.image}
+                            name={course.name}
+                            price={course.price}
+                            onViewDetails={() => openDetailsDialog(course)}
+                          />
+                        </Box>
+                      );
+                    })}
+                    </Box>
                   </Box>
                 </Box>
-              )}
+
+                {maxStartIndex > 0 && (
+                  <Box
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 0.75,
+                        px: 1.25,
+                        py: 0.75,
+                        borderRadius: 999,
+                        backgroundColor: "rgba(0,0,0,0.30)",
+                        backdropFilter: "blur(6px)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                      }}
+                    >
+                      {Array.from({ length: maxStartIndex + 1 }).map((_, index) => (
+                        <Box
+                          key={index}
+                          onClick={() => setCourseStartIndex(index)}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Go to course position ${index + 1}`}
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            backgroundColor:
+                              index === courseStartIndex
+                                ? "rgba(255,255,255,0.95)"
+                                : "rgba(255,255,255,0.55)",
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                )}
               </Box>
+            )}
           </Box>
         </Container>
       </Box>
@@ -708,6 +715,7 @@ export default function Courses() {
         </Box>
       </Dialog>
 
+      <SocialMediaIcons />
       <Footer />
     </>
   );

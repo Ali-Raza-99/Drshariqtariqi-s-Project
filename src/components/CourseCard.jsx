@@ -88,9 +88,9 @@ export default function CourseCard({
         </Typography>
 
         <Box sx={{ display: "flex", gap: 0.25, alignItems: "center", flexShrink: 0 }}>
-          <StarIcon sx={{ color: "warning.main" }} fontSize="small" />
-          <StarIcon sx={{ color: "warning.main" }} fontSize="small" />
-          <StarIcon sx={{ color: "warning.main" }} fontSize="small" />
+          <StarIcon sx={{ color: "#e7df00 !important" }} fontSize="small" />
+          <StarIcon sx={{ color: "#e7df00 !important" }} fontSize="small" />
+          <StarIcon sx={{ color: "#e7df00 !important" }} fontSize="small" />
         </Box>
       </Box>
 
@@ -120,7 +120,7 @@ export default function CourseCard({
           onClick={onViewDetails}
           sx={{
             bgcolor: "white",
-            color: "black",
+            color: "black !important",
             fontWeight: 800,
             borderRadius: 2,
             textTransform: "none",

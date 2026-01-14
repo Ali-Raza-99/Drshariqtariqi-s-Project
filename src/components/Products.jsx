@@ -32,7 +32,9 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import SocialMediaIcons from "./SocialMediaIcons";
 import Footer from "./layout/Footer";
+import ThemedLoadingSpinner from "./ThemedLoadingSpinner";
 
 import oilImg from "../assets/oil.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
@@ -52,6 +54,7 @@ const CartTransition = React.forwardRef(function CartTransition(props, ref) {
 });
 
 export default function Products() {
+  // ...existing code...
   const { currentUser, authLoading, logout } = useAuth();
   const location = useLocation();
   const theme = useTheme();
@@ -681,20 +684,23 @@ export default function Products() {
               </Grid>
             </Grid>
 
-            <Box
-              sx={{
-                mt: 4,
-                position: "relative",
-                borderRadius: 4,
-                border: "1px solid rgba(255,255,255,0.18)",
-                backgroundColor: "rgba(0,0,0,0.22)",
-                backdropFilter: "blur(8px)",
-                p: { xs: 2, md: 2.5 },
-                overflow: "hidden",
-                "--pv": productsPerView,
-                "--cardGap": { xs: "16px", md: "24px" },
-              }}
-              >
+            {loadingProducts ? (
+              <ThemedLoadingSpinner />
+            ) : (
+              <Box
+                sx={{
+                  mt: 4,
+                  position: "relative",
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  backgroundColor: "rgba(0,0,0,0.22)",
+                  backdropFilter: "blur(8px)",
+                  p: { xs: 2, md: 2.5 },
+                  overflow: "hidden",
+                  "--pv": productsPerView,
+                  "--cardGap": { xs: "16px", md: "24px" },
+                }}
+                >
               <IconButton
                 aria-label="Previous products"
                 onClick={goPrevProduct}
@@ -832,6 +838,7 @@ export default function Products() {
                 </Box>
               )}
               </Box>
+            )}
           </Box>
         </Container>
       </Box>
@@ -1007,6 +1014,7 @@ export default function Products() {
         </Box>
       </Dialog>
 
+      <SocialMediaIcons />
       <Footer />
     </>
   );

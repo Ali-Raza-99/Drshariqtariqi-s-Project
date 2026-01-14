@@ -1,0 +1,13 @@
+/* Custom style to align the calendar icon to the right in MUI DatePicker input */
+.dateFieldOfAppointment {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+/* Ensure the input has enough right padding for the icon */
+.dateFieldOfAppointment {
+  padding-right: 40px !important;
+}

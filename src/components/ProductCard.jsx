@@ -19,12 +19,13 @@ export default function ProductCard({
   image,
   name,
   price,
-  onAddToCart,
+  cartQty = 0,
+  onIncreaseQty,
+  onDecreaseQty,
   onBuyNow,
   onViewDetails,
 }) {
   const { currentUser } = useAuth();
-  const [qty, setQty] = useState(1);
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
 
   const requireLoginOr = (fn) => {
@@ -35,9 +36,8 @@ export default function ProductCard({
     fn?.();
   };
 
-  const increaseQty = () => requireLoginOr(() => setQty((q) => q + 1));
-  const decreaseQty = () =>
-    requireLoginOr(() => setQty((q) => (q > 1 ? q - 1 : q)));
+  const increaseQty = () => requireLoginOr(() => onIncreaseQty?.());
+  const decreaseQty = () => requireLoginOr(() => onDecreaseQty?.());
 
   return (
     <Card
@@ -137,9 +137,9 @@ export default function ProductCard({
         </Typography>
 
         <Box sx={{ display: "flex", gap: 0.25, alignItems: "center", flexShrink: 0 }}>
-          <StarIcon sx={{ color: "warning.main" }} fontSize="small" />
-          <StarIcon sx={{ color: "warning.main" }} fontSize="small" />
-          <StarIcon sx={{ color: "warning.main" }} fontSize="small" />
+          <StarIcon sx={{ color: "#FFD700 !important" }} fontSize="small" />
+          <StarIcon sx={{ color: "#FFD700 !important" }} fontSize="small" />
+          <StarIcon sx={{ color: "#FFD700 !important" }} fontSize="small" />
         </Box>
       </Box>
 
@@ -184,7 +184,7 @@ export default function ProductCard({
           }}
         >
           <Typography fontWeight={800} fontSize={14}>
-            {qty}
+            {cartQty}
           </Typography>
         </Box>
 
@@ -206,10 +206,10 @@ export default function ProductCard({
       <Button
         fullWidth
         disableRipple
-        onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty }))}
+        onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty: cartQty }))}
         sx={{
           bgcolor: "white",
-          color: "black",
+          color: "black !important",
           fontWeight: 800,
           borderRadius: 2,
           textTransform: "none",

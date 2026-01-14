@@ -1,3 +1,40 @@
+/* Appointment Date Picker section container custom style */
+/* .css-jbje30-MuiPickersSectionList-root-MuiPickersInputBase-sectionsContainer-MuiPickersOutlinedInput-sectionsContainer {
+  direction: ltr;
+  outline: none;
+padding: 9.5px 0 !important;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: inherit;
+  line-height: 1.4375em;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  outline: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex-wrap: nowrap;
+  -webkit-flex-wrap: nowrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
+
+  letter-spacing: inherit;
+  width: 182px;
+  color: currentColor;
+  opacity: 0;
+} */
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:focus,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #222 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 /* Mureed Counter submit button white with hover */
 .mureed-submit-btn {
   background: #888 !important;
@@ -53,16 +90,17 @@ input:-webkit-autofill:active {
   border-color: #fff !important;
 }
 .MuiButton-root, .MuiButtonBase-root, .MuiIconButton-root, .MuiButton-label {
-  color: #fff !important;
+  /* color: #fff !important; */
   border-color: #fff !important;
 }
-.MuiSvgIcon-root {
-  color: #fff !important;
-}
+/* .MuiSvgIcon-root color override removed */
 /* Override for date input icon in Mureed Counter */
 .css-v370od-MuiButtonBase-root-MuiIconButton-root {
   padding: 34px !important;
 }
+/* .MuiSvgIcon-root { */
+    /* color: #fff !important; */
+/* }     fix it remove that color property */
 #root {
   width: 100%;
   height: 100%;
@@ -107,3 +145,23 @@ input:-webkit-autofill:active {
 .read-the-docs {
   color: #888;
 }
+.ar {
+  
+  /* border: 1px solid !important; */
+  /* border-radius: 4px; */
+}
+    /* bgcolor: "",
+      color: "#f4ecec !important",
+        fontWeight: 700,
+        textTransform: "none",
+        "&:hover": {color:"#4e4e4e !important", bgcolor: "rgba(255,255,255,0.9)" },
+      }} */
+
+/* button{
+  background-color: #8e8b8b !important;
+  color: #f4ecec !important;
+}
+button:hover{
+  background-color: "rgba(255,255,255,0.9)" !important;
+  color: #4e4e4e !important;
+} */

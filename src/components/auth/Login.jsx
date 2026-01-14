@@ -6,6 +6,7 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
@@ -200,20 +201,20 @@ const Login = () => {
           sx={{
             height: 42,
             bgcolor: "#fff",
-            color: "#5b5757ff",
+            color: "#393737 !important",
             borderRadius: 4,
             textTransform: "none",
             fontSize: 15,
             fontWeight: 700,
             mb: 1.8,
-            "&:hover": { bgcolor: "grey.800", color: "#fff" },
+            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.35)", color: "#fff !important" },
             "&.Mui-disabled": {
               bgcolor: "rgba(255, 255, 255, 0.35)",
               color: "rgba(0, 0, 0, 0.45)",
             },
           }}
         >
-          Login
+          {submitting ? <CircularProgress size={24} color="inherit" /> : "Login"}
         </Button>
 
         <Typography align="center" variant="body2" color="#fff" fontSize={12.5}>
