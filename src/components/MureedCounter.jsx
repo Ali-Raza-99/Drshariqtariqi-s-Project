@@ -247,16 +247,43 @@ function MureedCounter() {
                     />
                   </Grid>
                   <Grid size={4} item xs={12} sm={4}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Date of Birth"
-                        value={form.dob}
-                        onChange={handleDateChange}
-                        renderInput={(params) => (
-                          <TextField {...params} name="dob" fullWidth required />
-                        )}
-                      />
-                    </LocalizationProvider>
+                    <TextField
+                      type="date"
+                      label="Date of Birth"
+                      name="dob"
+                      value={form.dob || ''}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        minHeight: 40,
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            border: '1px solid #fff',
+                          },
+                          '&:hover fieldset': {
+                            border: '1px solid #fff',
+                          },
+                          '&.Mui-focused fieldset': {
+                            border: '1px solid #fff',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: '#fff',
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: '#fff',
+                        },
+                        '& input': {
+                          color: '#fff',
+                        },
+                        '& input::-webkit-calendar-picker-indicator': {
+                          filter: 'invert(1)',
+                          cursor: 'pointer',
+                        },
+                      }}
+                    />
                   </Grid>
                 </Grid>
               </Grid>

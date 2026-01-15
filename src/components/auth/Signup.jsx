@@ -328,13 +328,14 @@ export default function Signup() {
 								}}
 									slotProps={{
 										textField: {
-											fullWidth: true,
-											size: "small",
-											required: true,
-											error: submitAttempted && !formData.dateOfBirth,
-											helperText: submitAttempted && !formData.dateOfBirth ? "Required" : "",
-											FormHelperTextProps: { sx: { color: 'red' } },
-									},
+ 											fullWidth: true,
+ 											size: "small",
+ 											required: true,
+ 											error: submitAttempted && !formData.dateOfBirth,
+ 											helperText: submitAttempted && !formData.dateOfBirth ? "Required" : "",
+ 											FormHelperTextProps: { sx: { color: 'red' } },
+ 											className: 'dateFieldSet',
+ 										},
 								}}
 								/>
 							</Grid>

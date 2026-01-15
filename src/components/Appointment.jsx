@@ -317,41 +317,78 @@ export default function Appointment() {
 
                       {/* Appointment Date Field */}
                       <Grid size={4}  item xs={12} md={4}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker 
-                            label="Appointment Date *"
-                            value={appointmentDate}
-                            onChange={(newValue) => setAppointmentDate(newValue)}
-                            slotProps={{
-                              textField: {
-                                fullWidth: true,
-                                size: "small",
-                                sx: { ...fieldSx, '& .MuiOutlinedInput-root, & .MuiOutlinedInput-notchedOutline, & .dateFieldOfAppointment': { borderRadius: 2 } },
-                                InputLabelProps: labelProps,
+                        <TextField
+                          type="date"
+                          label="Date of Birth"
+                          fullWidth
+                          className="dateAppointment"
+                          InputLabelProps={{ shrink: true }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': {
+                                border: '1px solid #fff',
                               },
-                            }}
-                          />
-                        </LocalizationProvider>
+                              '&:hover fieldset': {
+                                border: '1px solid #fff',
+                              },
+                              '&.Mui-focused fieldset': {
+                                border: '1px solid #fff',
+                              },
+                            },
+                            '& .MuiInputLabel-root': {
+                              color: '#fff',
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                              color: '#fff',
+                            },
+                            '& input': {
+                              color: '#fff',
+                            },
+                            '& input::-webkit-calendar-picker-indicator': {
+                              filter: 'invert(1)',
+                              color: '#fff',
+                              cursor: 'pointer',
+                            },
+                          }}
+                        />
                       </Grid>
 
                       {/* Age Date Field */}
                       <Grid size={4} item xs={12} md={4}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label="Date of Birth (Age) *"
-                            value={formData.age ? dayjs(formData.age) : null}
-                            onChange={(newValue) => handleInputChange("age", newValue ? newValue.format('YYYY-MM-DD') : "")}
-                            slotProps={{
-                              textField: {
-                                fullWidth: true,
-                                size: "small",
-                                sx: { ...fieldSx, '& .MuiOutlinedInput-root, & .MuiOutlinedInput-notchedOutline, & .dateFieldOfAppointment': { borderRadius: 16 } },
-                                InputLabelProps: labelProps,
-                                className: "ar"
+                        <TextField
+                          type="date"
+                          label="Date of Birth"
+                          fullWidth
+                          className="dateAppointment"
+                          InputLabelProps={{ shrink: true }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': {
+                                border: '1px solid #fff',
                               },
-                            }}
-                          />
-                        </LocalizationProvider>
+                              '&:hover fieldset': {
+                                border: '1px solid #fff',
+                              },
+                              '&.Mui-focused fieldset': {
+                                border: '1px solid #fff',
+                              },
+                            },
+                            '& .MuiInputLabel-root': {
+                              color: '#fff',
+                            },
+                            '& .MuiInputLabel-root.Mui-focused': {
+                              color: '#fff',
+                            },
+                            '& input': {
+                              color: '#fff',
+                            },
+                            '& input::-webkit-calendar-picker-indicator': {
+                              filter: 'invert(1)',
+                              color: '#fff',
+                              cursor: 'pointer',
+                            },
+                          }}
+                        />
                       </Grid>
                     </Grid>
                   </Box>
@@ -384,14 +421,24 @@ export default function Appointment() {
                       </Grid>
                        <Grid size={4} item xs={12} md={6}>
                         <Button
-                        sx={{ height: 40, borderRadius: 1 }}
+                          sx={{
+                            height: 40,
+                            borderRadius: 1,
+                            color: '#fff',
+                            borderColor: 'rgba(255,255,255,0.7)',
+                            '& .MuiSvgIcon-root': { color: '#fff' },
+                            '&:hover': {
+                              backgroundColor: 'rgba(255,255,255,0.08)',
+                              borderColor: 'rgba(255,255,255,1)',
+                            },
+                          }}
                           fullWidth
                           component="label"
                           size="small"
                           variant="outlined"
                           startIcon={<CloudUploadOutlinedIcon />}
                         >
-                            {paymentSlip ? "Selected" : "Upload Payment Slip *"}
+                          <span style={{ color: '#fff' }}>{paymentSlip ? "Selected" : "Upload Payment Slip *"}</span>
                           <input hidden type="file" onChange={handlePaymentSlipChange} />
                         </Button>
                       </Grid>
@@ -426,11 +473,19 @@ export default function Appointment() {
                       <Button
                         fullWidth
                         variant="outlined"
-                        startIcon={<AccountBalanceIcon />}
+                        startIcon={<AccountBalanceIcon sx={{ color: '#fff' }} />}
                         onClick={() => setPaymentDialogOpen(true)}
-                        sx={{ height: 56 }}
+                        sx={{
+                          height: 56,
+                          color: '#fff',
+                          borderColor: 'rgba(255,255,255,0.7)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255,255,255,0.08)',
+                            borderColor: 'rgba(255,255,255,1)',
+                          },
+                        }}
                       >
-                        View Payment Details
+                        <span style={{ color: '#fff' }}>View Payment Details</span>
                       </Button>
                     </Grid>
                     <Grid size={6} item xs={12} md={6}>

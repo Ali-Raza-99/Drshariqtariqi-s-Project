@@ -14,6 +14,7 @@ import AdminCourses from "./components/admin/AdminCourses.jsx";
 import AdminRoute from "./components/admin/AdminRoute.jsx";
 
 
+
 function App() {
   return (
     <Routes>
@@ -29,14 +30,6 @@ function App() {
         element={
           <AdminRoute>
             <MureedCounter />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/appointments"
-        element={
-          <AdminRoute>
-            <Appointment />
           </AdminRoute>
         }
       />
