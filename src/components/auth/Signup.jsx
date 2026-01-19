@@ -227,7 +227,7 @@ export default function Signup() {
 						Create your account to continue.
 					</Typography>
 					{submitError ? (
-						<Typography sx={{ mb: 2, color: "error.main",color:'#d53c3c !important' }} textAlign="center">
+						<Typography sx={{ mb: 2,color:'#d53c3c !important' }} textAlign="center">
 							{submitError}
 						</Typography>
 					) : null}

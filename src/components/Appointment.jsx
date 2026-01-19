@@ -45,13 +45,13 @@ export default function Appointment() {
     fatherName: "",
     email: "",
     gender: "",
-    age: "",
     contact: "",
     address: "",
     city: "",
+    dateOfBirth: "",
   });
 
-  const [appointmentDate, setAppointmentDate] = useState(null);
+  const [appointmentDate, setAppointmentDate] = useState("");
   const [paymentSlip, setPaymentSlip] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -108,8 +108,8 @@ export default function Appointment() {
 
   const handlePaymentSlipChange = (e) => {
     const file = e.target.files?.[0] ?? null;
-    e.target.value = "";
     setPaymentSlip(file);
+    setError("");
   };
 
   const isFormValid = () => {
@@ -118,12 +118,12 @@ export default function Appointment() {
       formData.fatherName &&
       formData.email &&
       formData.gender &&
-      formData.age &&
       formData.contact &&
       formData.address &&
       formData.city &&
-      appointmentDate !== null && appointmentDate !== '' &&
-      paymentSlip !== null
+      formData.dateOfBirth &&
+      appointmentDate &&
+      paymentSlip
     );
   };
 
@@ -134,8 +134,19 @@ export default function Appointment() {
       setLoginDialogOpen(true);
       return;
     }
-    if (!isFormValid()) {
-      setError("Please fill all fields and upload payment slip");
+    // Validate all required fields
+    if (!formData.name ||
+        !formData.fatherName || 
+        !formData.email ||
+        !formData.gender ||
+        !appointmentDate ||
+        !formData.dateOfBirth ||
+        !formData.contact ||
+        !formData.city ||
+        !paymentSlip ||
+        !formData.address
+      ) {
+      setError("please fill the input fields");
       return;
     }
     setSubmitting(true);
@@ -148,7 +159,7 @@ export default function Appointment() {
       // Prepare data
       const dataToSend = {
         ...formData,
-        appointmentDate: appointmentDate ? (typeof appointmentDate === 'string' ? appointmentDate : appointmentDate.format ? appointmentDate.format('YYYY-MM-DD') : appointmentDate.toString()) : '',
+        appointmentDate,
         paymentSlipUrl,
         userId: currentUser.uid,
         userEmail: currentUser.email,
@@ -158,22 +169,24 @@ export default function Appointment() {
       // Save to Firestore
       await addDoc(collection(db, "Appointment"), dataToSend);
       setSuccessMsg("Your request has been submitted.");
+      setSubmitting(false); // Set submitting to false before resetting form
       setFormData({
         name: "",
         fatherName: "",
         email: "",
         gender: "",
-        age: "",
         contact: "",
         address: "",
         city: "",
+        dateOfBirth: "",
       });
-      setAppointmentDate(null);
+      setAppointmentDate("");
       setPaymentSlip(null);
+      setError("");
     } catch (err) {
       setError(err?.message || "Submission failed. Try again.");
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   useEffect(() => {
@@ -267,6 +280,7 @@ export default function Appointment() {
                           size="small"
                           sx={fieldSx}
                           InputLabelProps={labelProps}
+                          value={formData.name}
                           onChange={(e) => handleInputChange("name", e.target.value)}
                         />
                       </Grid>
@@ -278,6 +292,7 @@ export default function Appointment() {
                           size="small"
                           sx={fieldSx}
                           InputLabelProps={labelProps}
+                          value={formData.fatherName}
                           onChange={(e) => handleInputChange("fatherName", e.target.value)}
                         />
                       </Grid>
@@ -289,6 +304,7 @@ export default function Appointment() {
                           size="small"
                           sx={fieldSx}
                           InputLabelProps={labelProps}
+                          value={formData.email}
                           onChange={(e) => handleInputChange("email", e.target.value)}
                         />
                       </Grid>
@@ -306,6 +322,7 @@ export default function Appointment() {
                           <Select
                             label="Gender *"
                             sx={{ height: 40, borderRadius: 1, ...fieldSx }}
+                            value={formData.gender}
                             onChange={(e) => handleInputChange("gender", e.target.value)}
                           >
                             <MenuItem value="Male">Male</MenuItem>
@@ -319,10 +336,12 @@ export default function Appointment() {
                       <Grid size={4}  item xs={12} md={4}>
                         <TextField
                           type="date"
-                          label="Date of Birth"
+                          label="Appointment Date"
                           fullWidth
                           className="dateAppointment"
                           InputLabelProps={{ shrink: true }}
+                          value={appointmentDate}
+                          onChange={e => setAppointmentDate(e.target.value)}
                           sx={{
                             '& .MuiOutlinedInput-root': {
                               '& fieldset': {
@@ -353,14 +372,16 @@ export default function Appointment() {
                         />
                       </Grid>
 
-                      {/* Age Date Field */}
+                      {/* Date of Birth (Age) Field */}
                       <Grid size={4} item xs={12} md={4}>
                         <TextField
                           type="date"
-                          label="Date of Birth"
+                          label="Date of Birth (Age)"
                           fullWidth
                           className="dateAppointment"
                           InputLabelProps={{ shrink: true }}
+                          value={formData.dateOfBirth}
+                          onChange={e => handleInputChange("dateOfBirth", e.target.value)}
                           sx={{
                             '& .MuiOutlinedInput-root': {
                               '& fieldset': {
@@ -405,6 +426,7 @@ export default function Appointment() {
                           size="small"
                           sx={fieldSx}
                           InputLabelProps={labelProps}
+                          value={formData.contact}
                           onChange={(e) => handleInputChange("contact", e.target.value)}
                         />
                       </Grid>
@@ -416,6 +438,7 @@ export default function Appointment() {
                           size="small"
                           sx={fieldSx}
                           InputLabelProps={labelProps}
+                          value={formData.city}
                           onChange={(e) => handleInputChange("city", e.target.value)}
                         />
                       </Grid>
@@ -493,7 +516,7 @@ export default function Appointment() {
                         fullWidth
                         variant="contained"
                         onClick={handleSubmit}
-                        disabled={!isFormValid() || submitting}
+                        // removed disabled prop so button is always clickable
                         sx={{ height: 56, fontWeight: 900,backgroundColor: "#7e7e7e",color: "#000", "&:hover": {backgroundColor: "#f5f5f5",color:"#4e4e4e !important"}, }}
                       >
                         {submitting ? <CircularProgress size={24} /> : "Submit"}

@@ -12,6 +12,8 @@ import Admin from "./components/admin/Admin.jsx";
 import AdminProducts from "./components/admin/AdminProducts.jsx";
 import AdminCourses from "./components/admin/AdminCourses.jsx";
 import AdminRoute from "./components/admin/AdminRoute.jsx";
+import AdminNavbar from "./components/admin/AdminNavbar.jsx";
+import AdminViewAppointments from "./components/admin/AdminViewAppointments.jsx";
 
 
 
@@ -29,7 +31,10 @@ function App() {
         path="/admin/mureed-requests"
         element={
           <AdminRoute>
-            <MureedCounter />
+            <>
+              <AdminNavbar />
+              <MureedCounter />
+            </>
           </AdminRoute>
         }
       />
@@ -37,7 +42,10 @@ function App() {
         path="/admin"
         element={
           <AdminRoute>
-            <Admin />
+            <>
+              <AdminNavbar />
+              <Admin />
+            </>
           </AdminRoute>
         }
       />
@@ -45,7 +53,10 @@ function App() {
         path="/admin/products"
         element={
           <AdminRoute>
-            <AdminProducts />
+            <>
+              <AdminNavbar />
+              <AdminProducts />
+            </>
           </AdminRoute>
         }
       />
@@ -53,7 +64,21 @@ function App() {
         path="/admin/courses"
         element={
           <AdminRoute>
-            <AdminCourses />
+            <>
+              <AdminNavbar />
+              <AdminCourses />
+            </>
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/appointments"
+        element={
+          <AdminRoute>
+            <>
+              <AdminNavbar />
+              <AdminViewAppointments />
+            </>
           </AdminRoute>
         }
       />
