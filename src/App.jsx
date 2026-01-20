@@ -5,6 +5,7 @@ import Products from "./components/Products.jsx";
 import KhidmatEKhalq from "./components/KhidmatEKhalq.jsx";
 import Courses from "./components/Courses.jsx";
 import MureedCounter from "./components/MureedCounter.jsx";
+import AdminViewMureedRequests from "./components/admin/AdminViewMureedRequests.jsx";
 import Appointment from "./components/Appointment.jsx";
 import Login from "./components/auth/Login.jsx";
 import Signup from "./components/auth/Signup.jsx";
@@ -33,7 +34,7 @@ function App() {
           <AdminRoute>
             <>
               <AdminNavbar />
-              <MureedCounter />
+              <AdminViewMureedRequests />
             </>
           </AdminRoute>
         }
