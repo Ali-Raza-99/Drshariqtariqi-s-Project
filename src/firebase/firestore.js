@@ -184,6 +184,7 @@ export const deleteQurbaniBank = async (id) => {
 // Mureed Registration
 // ------------------------------
 
+
 export const registerMureed = async ({ data }) => {
 	const ref = collection(db, "mureeds");
 	const docRef = await addDoc(ref, {
@@ -199,4 +200,9 @@ export const listMureeds = async () => {
 	const q = query(ref, orderBy("createdAt", "desc"));
 	const snap = await getDocs(q);
 	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const deleteMureed = async (id) => {
+	const ref = doc(db, "mureeds", id);
+	await deleteDoc(ref);
 };
