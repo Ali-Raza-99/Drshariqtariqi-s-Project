@@ -15,6 +15,7 @@ import bgImage from "../../assets/5.png";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile } from "../../firebase/firestore";
 import { firebaseErrorMessage } from "../../utils/firebaseErrorMessage";
+import { getAuth } from "firebase/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");

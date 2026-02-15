@@ -13,9 +13,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import { getUserProfile } from "../../firebase/firestore";
-import { db } from "../../firebase/firestore";
+import { getUserProfile, listAppointments, deleteAppointment } from "../../firebase/firestore";
 import SitePage from "../layout/SitePage";
 
 export default function AdminViewAppointments() {
@@ -33,16 +31,16 @@ export default function AdminViewAppointments() {
     const fetchAppointments = async () => {
       setLoading(true);
       try {
-        const querySnapshot = await getDocs(collection(db, "Appointment"));
-        const data = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const data = await listAppointments();
         setAppointments(data);
       } catch (err) {
-        // Optionally handle error
+        console.error("Error fetching appointments:", err);
+        setAppointments([]);
       }
       setLoading(false);
     };
     fetchAppointments();
-  }, [deletingId]);
+  }, []);
 
   const handleShowImage = (url) => {
     setSelectedImage(url);
@@ -52,10 +50,10 @@ export default function AdminViewAppointments() {
   const handleDelete = async (id) => {
     setDeletingId(id);
     try {
-      await deleteDoc(doc(db, "Appointment", id));
+      await deleteAppointment(id);
       setAppointments((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      // Optionally handle error
+      console.error("Error deleting appointment:", err);
     }
     setDeletingId(null);
   };
@@ -96,7 +94,7 @@ export default function AdminViewAppointments() {
         className="admin-appointments-container"
         sx={{
           bgcolor: "transparent",
-          minHeight: { xs: '60vh', sm: '66vh' },
+          minHeight: { xs: '60vh', sm: '60vh' },
           py: { xs: 1, sm: 2 },
           borderRadius: { xs: 2, sm: 4 },
           boxShadow: "0 2px 8px 0 rgba(0,0,0,0.10)",
@@ -119,7 +117,7 @@ export default function AdminViewAppointments() {
           ) : (
             <Grid container spacing={3}>
               {appointments.map((a) => (
-                  <Grid item xs={12} sm={12} md={6} key={a.id} sx={{ display: { xs: 'flex', sm: 'block' }, justifyContent: { xs: 'center', sm: 'initial' } }}>
+                  <Grid item xs={12} sm={12} md={6} key={a.id} sx={{ width: '100%' }}>
                   <Box
                     sx={{
                       bgcolor: 'rgba(255,255,255,0.04)',
@@ -133,59 +131,57 @@ export default function AdminViewAppointments() {
                       gap: 2,
                       p: 2,
                       position: 'relative',
-                      minHeight: 60,
+                      minHeight: 80,
+                      width: '100%',
+                      height: '100%',
                     }}
                   >
                     {/* User Photo */}
-                    <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', height: 54 }}>
+                    <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
                       <img
                         src={a.userPhotoURL || 'https://ui-avatars.com/api/?name=User'}
                         alt={a.name || 'User'}
-                        style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.10)', cursor: 'pointer' }}
+                        style={{ width: 50, height: 50, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.10)', cursor: 'pointer' }}
                         onClick={() => handleShowUser(a)}
                         title="View User Details"
                       />
                     </Box>
-                    {/* Details and icons in a row */}
-                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, height: 54 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 90, mr: 1, height: '100%', alignItems: 'flex-start' }}>
-                        <Typography fontWeight={800} sx={{ fontSize: 16, lineHeight: 1.1, wordBreak: 'break-word' }}>
+                    {/* Details in a column */}
+                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
+                      <Box>
+                        <Typography fontWeight={800} sx={{ fontSize: 16, lineHeight: 1.2, wordBreak: 'break-word' }}>
                           {typeof a.name === 'string' && a.name.length > 0
                             ? a.name.charAt(0).toUpperCase() + a.name.slice(1)
                             : a.name}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 90, mr: 1 }}>
-                        <Typography variant="body2" sx={{ opacity: 0.8, fontSize: 14 }}>
-                          <span style={{ color: '#fff' }}>{a.contact}</span>
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#bbb', fontSize: 12, lineHeight: 1, mt: 0.2 }}>
-                          {a.city}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.2 }}>
-                        <Tooltip title="Delete Appointment">
+                      <Typography variant="body2" sx={{ opacity: 0.8, fontSize: 14, color: '#fff' }}>
+                        {a.contact}
+                      </Typography>
+                    </Box>
+                    {/* Action Buttons */}
+                    <Box sx={{ flexShrink: 0, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+                      <Tooltip title="Delete Appointment">
+                        <IconButton
+                          onClick={() => handleDelete(a.id)}
+                          sx={{ color: '#fff', bgcolor: '#222', borderRadius: 2, border: '1px solid #fff' }}
+                          disabled={deletingId === a.id}
+                          size="small"
+                        >
+                          {deletingId === a.id ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <DeleteIcon fontSize="small" />}
+                        </IconButton>
+                      </Tooltip>
+                      {a.paymentSlipUrl && (
+                        <Tooltip title="View Payment Slip">
                           <IconButton
-                            onClick={() => handleDelete(a.id)}
+                            onClick={() => handleShowImage(a.paymentSlipUrl)}
                             sx={{ color: '#fff', bgcolor: '#222', borderRadius: 2, border: '1px solid #fff' }}
-                            disabled={deletingId === a.id}
                             size="small"
                           >
-                            {deletingId === a.id ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <DeleteIcon fontSize="small" />}
+                            <ImageIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        {a.paymentSlipUrl && (
-                          <Tooltip title="View Payment Slip">
-                            <IconButton
-                              onClick={() => handleShowImage(a.paymentSlipUrl)}
-                              sx={{ color: '#fff', bgcolor: '#222', borderRadius: 2, border: '1px solid #fff' }}
-                              size="small"
-                            >
-                              <ImageIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </Box>
+                      )}
                     </Box>
                   </Box>
                 </Grid>

@@ -54,13 +54,13 @@ export default function AdminViewMureedRequests() {
       <Box
         sx={{
           bgcolor: "transparent",
-          minHeight: { xs: '60vh', sm: '66vh' },
+          minHeight: { xs: '60vh', sm: '60vh' },
           py: { xs: 1, sm: 2 },
           borderRadius: { xs: 2, sm: 4 },
           boxShadow: "0 2px 8px 0 rgba(0,0,0,0.10)",
           border: "1px solid rgba(255,255,255,0.18)",
           backdropFilter: "blur(6px)",
-          mb: { xs: '60px', sm: '79px' },
+          mb: { xs: '100px', sm: '150px' },
           width: '100%',
           maxWidth: '100vw',
         }}
@@ -77,7 +77,7 @@ export default function AdminViewMureedRequests() {
           ) : (
             <Grid container spacing={3}>
               {mureeds.map((m) => (
-                <Grid item xs={12} sm={12} md={6} key={m.id} sx={{ display: { xs: 'flex', sm: 'block' }, justifyContent: { xs: 'center', sm: 'initial' } }}>
+                <Grid item xs={12} sm={12} md={6} key={m.id} sx={{ width: '100%' }}>
                   <Box
                     sx={{
                       bgcolor: 'rgba(255,255,255,0.04)',
@@ -91,45 +91,46 @@ export default function AdminViewMureedRequests() {
                       gap: 2,
                       p: 2,
                       position: 'relative',
-                      minHeight: 60,
+                      minHeight: 80,
+                      width: '100%',
+                      height: '100%',
                     }}
                   >
                     {/* User Photo */}
-                    <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', height: 54 }}>
+                    <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
                       <img
                         src={m.pictureUrl || 'https://ui-avatars.com/api/?name=User'}
                         alt={m.name || 'User'}
-                        style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.10)', cursor: 'pointer' }}
+                        style={{ width: 50, height: 50, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.10)', cursor: 'pointer' }}
                         title="View Mureed Details"
                       />
                     </Box>
                     {/* Details in a row */}
-                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, height: 54 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 90, mr: 1, height: '100%', alignItems: 'flex-start' }}>
-                        <Typography fontWeight={800} sx={{ fontSize: 16, lineHeight: 1.1, wordBreak: 'break-word' }}>
+                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0.5 }}>
+                      <Box>
+                        <Typography fontWeight={800} sx={{ fontSize: 16, lineHeight: 1.2, wordBreak: 'break-word' }}>
                           {typeof m.name === 'string' && m.name.length > 0 ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#bbb', fontSize: 12, lineHeight: 1, mt: 0.2 }}>
+                        <Typography variant="caption" sx={{ color: '#bbb', fontSize: 12, lineHeight: 1.2 }}>
                           Father: {m.fatherName}
                         </Typography>
                       </Box>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 90, mr: 1 }}>
-                        <Typography variant="body2" sx={{ opacity: 0.8, fontSize: 14 }}>
-                          <span style={{ color: '#fff' }}>{m.contact}</span>
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1.2 }}>
-                        <Tooltip title="Delete Mureed Request">
-                          <IconButton
-                            onClick={() => handleDelete(m.id)}
-                            sx={{ color: '#fff', bgcolor: '#222', borderRadius: 2, border: '1px solid #fff' }}
-                            disabled={deletingId === m.id}
-                            size="small"
-                          >
-                            {deletingId === m.id ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <DeleteIcon fontSize="small" />}
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
+                      <Typography variant="body2" sx={{ opacity: 0.8, fontSize: 14, color: '#fff' }}>
+                        {m.contact}
+                      </Typography>
+                    </Box>
+                    {/* Delete Button */}
+                    <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                      <Tooltip title="Delete Mureed Request">
+                        <IconButton
+                          onClick={() => handleDelete(m.id)}
+                          sx={{ color: '#fff', bgcolor: '#222', borderRadius: 2, border: '1px solid #fff' }}
+                          disabled={deletingId === m.id}
+                          size="small"
+                        >
+                          {deletingId === m.id ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <DeleteIcon fontSize="small" />}
+                        </IconButton>
+                      </Tooltip>
                     </Box>
                   </Box>
                 </Grid>

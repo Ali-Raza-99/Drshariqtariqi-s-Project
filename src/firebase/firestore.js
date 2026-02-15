@@ -206,3 +206,28 @@ export const deleteMureed = async (id) => {
 	const ref = doc(db, "mureeds", id);
 	await deleteDoc(ref);
 };
+
+// ------------------------------
+// Appointments
+// ------------------------------
+
+export const listAppointments = async () => {
+	const ref = collection(db, "Appointment");
+	const q = query(ref, orderBy("createdAt", "desc"));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const deleteAppointment = async (id) => {
+	const ref = doc(db, "Appointment", id);
+	await deleteDoc(ref);
+};
+
+export const setUserRole = async (uid, role) => {
+	const ref = doc(db, "users", uid);
+	await updateDoc(ref, {
+		role: role,
+		updatedAt: serverTimestamp(),
+	});
+	return ref;
+};
