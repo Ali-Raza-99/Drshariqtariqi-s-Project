@@ -11,6 +11,7 @@ import {
 	serverTimestamp,
 	setDoc,
 	updateDoc,
+	where,
 } from "firebase/firestore";
 import { firebaseApp } from "./firebase";
 
@@ -231,3 +232,124 @@ export const setUserRole = async (uid, role) => {
 	});
 	return ref;
 };
+
+// ------------------------------
+// Cart (Global Collection)
+// stored in cart/{cartItemId}
+// with uid for filtering
+// ------------------------------
+
+export const addToCart = async ({ uid, productId, productData, quantity = 1 }) => {
+	const cartRef = collection(db, "cart");
+	const q = query(cartRef, where("uid", "==", uid), where("productId", "==", productId));
+	const existingDocs = await getDocs(q);
+	
+	// Check if product already exists in user's cart
+	if (existingDocs.docs.length > 0) {
+		const existingProduct = existingDocs.docs[0];
+		// Update quantity
+		await updateDoc(doc(cartRef, existingProduct.id), {
+			quantity: (existingProduct.data().quantity ?? 1) + quantity,
+			updatedAt: serverTimestamp(),
+		});
+		return existingProduct.ref;
+	} else {
+		// Add new product to cart
+		const docRef = await addDoc(cartRef, {
+			uid,
+			productId,
+			...productData,
+			quantity,
+			addedAt: serverTimestamp(),
+			updatedAt: serverTimestamp(),
+		});
+		return docRef;
+	}
+};
+
+export const getCartItems = async (uid) => {
+	const cartRef = collection(db, "cart");
+	const q = query(cartRef, where("uid", "==", uid));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const updateCartItemQuantity = async ({ cartItemId, quantity }) => {
+	const itemRef = doc(db, "cart", cartItemId);
+	// Update quantity (can be 0 to show out of stock)
+	await updateDoc(itemRef, {
+		quantity,
+		updatedAt: serverTimestamp(),
+	});
+	return itemRef;
+};
+
+export const removeCartItem = async (cartItemId) => {
+	const itemRef = doc(db, "cart", cartItemId);
+	await deleteDoc(itemRef);
+};
+
+export const clearCart = async (uid) => {
+	const cartRef = collection(db, "cart");
+	const q = query(cartRef, where("uid", "==", uid));
+	const snap = await getDocs(q);
+	const batch = [];
+	snap.docs.forEach((d) => {
+		batch.push(deleteDoc(d.ref));
+	});
+	await Promise.all(batch);
+};
+
+// ------------------------------
+// Orders (Global Collection)
+// stored in orders/{orderId}
+// with uid for user filtering
+// ------------------------------
+
+export const createOrder = async ({ uid, orderData }) => {
+	const ordersRef = collection(db, "orders");
+	const docRef = await addDoc(ordersRef, {
+		...orderData,
+		uid,
+		status: "completed",
+		checkoutDate: serverTimestamp(),
+		updatedAt: serverTimestamp(),
+	});
+	return docRef;
+};
+
+export const getUserOrders = async (uid) => {
+	const ordersRef = collection(db, "orders");
+	const q = query(ordersRef, where("uid", "==", uid), orderBy("checkoutDate", "desc"));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const getAllOrders = async () => {
+	const ordersRef = collection(db, "orders");
+	const q = query(ordersRef, orderBy("checkoutDate", "desc"));
+	const snap = await getDocs(q);
+	return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const updateOrder = async ({ orderId, data }) => {
+	const orderRef = doc(db, "orders", orderId);
+	await updateDoc(orderRef, {
+		...data,
+		updatedAt: serverTimestamp(),
+	});
+	return orderRef;
+};
+
+export const deleteOrder = async (orderId) => {
+	const orderRef = doc(db, "orders", orderId);
+	await deleteDoc(orderRef);
+};
+
+// Backward compatibility aliases
+export const addOrderToCart = addToCart;
+export const getUserCart = getCartItems;
+export const removeFromCart = removeCartItem;
+export const clearUserCart = clearCart;
+export const createCheckout = createOrder;
+export const getUserCheckouts = getUserOrders;

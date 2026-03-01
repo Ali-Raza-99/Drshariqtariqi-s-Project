@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Card,
@@ -13,20 +13,33 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import StarIcon from "@mui/icons-material/Star";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import LoginFirstDialog from "./auth/LoginFirstDialog";
 
 export default function ProductCard({
   image,
   name,
   price,
-  cartQty = 0,
+  id,
   onIncreaseQty,
   onDecreaseQty,
-  onBuyNow,
   onViewDetails,
 }) {
   const { currentUser } = useAuth();
+  const { cartItems, updateQuantity, addToCart } = useCart();
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+
+  // Get current quantity from cart for this product
+  const currentQuantity = useMemo(() => {
+    const cartItem = cartItems.find(item => item.productId === id);
+    return cartItem?.quantity ?? 0;
+  }, [cartItems, id]);
+
+  // Get cart item ID for this product
+  const cartItemId = useMemo(() => {
+    const cartItem = cartItems.find(item => item.productId === id);
+    return cartItem?.id;
+  }, [cartItems, id]);
 
   const requireLoginOr = (fn) => {
     if (!currentUser) {
@@ -36,8 +49,36 @@ export default function ProductCard({
     fn?.();
   };
 
-  const increaseQty = () => requireLoginOr(() => onIncreaseQty?.());
-  const decreaseQty = () => requireLoginOr(() => onDecreaseQty?.());
+  const handleIncreaseQty = async () => {
+    requireLoginOr(async () => {
+      try {
+        if (currentQuantity === 0) {
+          // Add to cart if not exists
+          await addToCart({ id, name, price, image });
+        } else {
+          // Increase quantity
+          await updateQuantity(cartItemId, currentQuantity + 1);
+        }
+        onIncreaseQty?.();
+      } catch (err) {
+        console.error("Error updating quantity:", err);
+      }
+    });
+  };
+
+  const handleDecreaseQty = async () => {
+    requireLoginOr(async () => {
+      try {
+        if (currentQuantity > 0) {
+          // Decrease quantity (can go to 0)
+          await updateQuantity(cartItemId, Math.max(0, currentQuantity - 1));
+          onDecreaseQty?.();
+        }
+      } catch (err) {
+        console.error("Error updating quantity:", err);
+      }
+    });
+  };
 
   return (
     <Card
@@ -158,10 +199,10 @@ export default function ProductCard({
         Rs. {price}
       </Typography>
 
-      {/* QUANTITY */}
+      {/* QUANTITY CONTROL */}
       <Stack direction="row" alignItems="center" spacing={1} mt={1.5}>
         <IconButton
-          onClick={decreaseQty}
+          onClick={handleDecreaseQty}
           disableRipple
           sx={{
             color: "white",
@@ -184,12 +225,12 @@ export default function ProductCard({
           }}
         >
           <Typography fontWeight={800} fontSize={14}>
-            {cartQty}
+            {currentQuantity}
           </Typography>
         </Box>
 
         <IconButton
-          onClick={increaseQty}
+          onClick={handleIncreaseQty}
           disableRipple
           sx={{
             color: "white",
@@ -206,7 +247,7 @@ export default function ProductCard({
       <Button
         fullWidth
         disableRipple
-        onClick={() => requireLoginOr(() => onBuyNow?.({ name, price, qty: cartQty }))}
+        onClick={handleIncreaseQty}
         sx={{
           bgcolor: "white",
           color: "black !important",
@@ -218,7 +259,7 @@ export default function ProductCard({
           "&:hover": { bgcolor: "#eee" },
         }}
       >
-        Buy Now
+        {currentQuantity > 0 ? "Update Cart" : "Add to Cart"}
       </Button>
 
       <LoginFirstDialog

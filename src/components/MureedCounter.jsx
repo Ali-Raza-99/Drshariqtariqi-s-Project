@@ -4,24 +4,25 @@ import dayjs from "dayjs";
 import {
   Box,
   Button,
-  CircularProgress,
   Divider,
   Grid,
   TextField,
   Typography,
+  Alert,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import SocialMediaIcons from "./SocialMediaIcons";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SitePage from "./layout/SitePage";
+import LoadingSpinner from "./common/LoadingSpinner";
 import { useAuth } from "../context/AuthContext";
-import { db } from "../firebase/firestore";
-import { uploadToCloudinaryUnsigned } from "../utils/cloudinaryUpload";
+import { uploadToFolderAndGetUrl } from "../firebase/storage";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { registerMureed } from "../firebase/firestore";
+import { db } from "../firebase/firestore";
 import LoginFirstDialog from "./auth/LoginFirstDialog";
+import { COLORS, FIELD_SX, LABEL_PROPS } from "../theme/constants";
 
 function MureedCounter() {
   const [form, setForm] = useState({

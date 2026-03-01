@@ -12,6 +12,7 @@ import Signup from "./components/auth/Signup.jsx";
 import Admin from "./components/admin/Admin.jsx";
 import AdminProducts from "./components/admin/AdminProducts.jsx";
 import AdminCourses from "./components/admin/AdminCourses.jsx";
+import AdminOrders from "./components/admin/AdminOrders.jsx";
 import AdminRoute from "./components/admin/AdminRoute.jsx";
 import AdminNavbar from "./components/admin/AdminNavbar.jsx";
 import AdminViewAppointments from "./components/admin/AdminViewAppointments.jsx";
@@ -68,6 +69,17 @@ function App() {
             <>
               <AdminNavbar />
               <AdminCourses />
+            </>
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/orders"
+        element={
+          <AdminRoute>
+            <>
+              <AdminNavbar />
+              <AdminOrders />
             </>
           </AdminRoute>
         }
