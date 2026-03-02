@@ -17,6 +17,7 @@ import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SitePage from "./layout/SitePage";
 import LoadingSpinner from "./common/LoadingSpinner";
+import SocialMediaIcons from "./SocialMediaIcons";
 import { useAuth } from "../context/AuthContext";
 import { uploadToFolderAndGetUrl } from "../firebase/storage";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
