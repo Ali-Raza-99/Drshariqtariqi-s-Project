@@ -119,7 +119,7 @@ export default function Signup() {
 			setFormData(initialFormData);
 			setProfilePictureError("");
 			setSubmitAttempted(false);
-			navigate("/login", { replace: true });
+			navigate("/", { replace: true });
 		} catch (err) {
 			setSubmitError(firebaseErrorMessage(err, "Signup failed"));
 		} finally {
