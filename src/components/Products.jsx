@@ -12,12 +12,18 @@ import {
   Divider,
   Dialog,
   DialogContent,
+  Drawer,
   Grid,
   IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
   Menu,
   MenuItem,
   Slide,
   Stack,
+  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -34,6 +40,7 @@ import SocialMediaIcons from "./SocialMediaIcons";
 import Footer from "./layout/Footer";
 import ThemedLoadingSpinner from "./ThemedLoadingSpinner";
 import CartDialog from "./cart/CartDialog";
+import CheckoutDialog from "./cart/CheckoutDialog";
 
 import oilImg from "../assets/oil.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
@@ -66,12 +73,17 @@ export default function Products() {
 
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  /**
+   * Fallback products (hardcoded)
+   * TEMPORARY: Only used if Firestore query fails or returns empty
+   * After security rules are fixed, this fallback won't be needed
+   * for guest users since they'll get real data from Firestore
+   */
   const fallbackProducts = useMemo(
     () => [
-      { id: "oil", name: "Oil", price: 1200, imageUrl: oilImg },
-      { id: "oil", name: "Oil", price: 1200, imageUrl: oilImg },
-      { id: "oil", name: "Oil", price: 1200, imageUrl: oilImg },
       { id: "oil", name: "Oil", price: 1200, imageUrl: oilImg },
       { id: "bakhor", name: "Bakhor", price: 1500, imageUrl: bakhorImg },
       { id: "powder", name: "Powder", price: 900, imageUrl: powderImg },
@@ -82,23 +94,62 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
+  /**
+   * Fetch products from Firestore
+   * Works for both guest (unauthenticated) and logged-in users
+   * if Firestore security rules allow public read access
+   */
   React.useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
-      if (authLoading) return;
       try {
         setLoadingProducts(true);
+        console.log('🔄 [Products] Fetching from Firestore...');
+        
         const data = await listProducts();
+        
         if (cancelled) return;
+        
+        console.log('✅ [Products] Fetch successful:', {
+          count: data?.length || 0,
+          samples: data?.slice(0, 2),
+        });
 
         if (Array.isArray(data) && data.length > 0) {
+          // ✅ Real data from Firestore
           setProducts(data);
         } else {
+          // ⚠️ Empty result from database - use fallback
+          console.warn('⚠️ [Products] No products in database, using fallback images');
           setProducts(fallbackProducts);
         }
-      } catch {
+      } catch (error) {
         if (cancelled) return;
+
+        const errorCode = error?.code;
+        const errorMsg = error?.message;
+        const isPermissionError = errorCode === 'permission-denied';
+        const isNetworkError = errorCode === 'unavailable' || errorCode === 'failed-precondition';
+
+        console.error('❌ [Products] Fetch failed:', {
+          code: errorCode,
+          message: errorMsg,
+          isPermissionError,
+          isNetworkError,
+        });
+
+        // Special handling for permission denied (security rules issue)
+        if (isPermissionError) {
+          console.error(
+            '\n🔐 FIRESTORE SECURITY RULES ARE BLOCKING GUEST ACCESS\n' +
+            '📋 Issue: Firestore rules don\'t allow public read for products collection\n' +
+            '✅ Solution: Update Firestore rules to allow guest read access\n' +
+            '📖 Guide: See FIRESTORE_SECURITY_RULES.md in project root\n'
+          );
+        }
+
+        // Use fallback for any error condition
         setProducts(fallbackProducts);
       } finally {
         if (!cancelled) setLoadingProducts(false);
@@ -109,7 +160,7 @@ export default function Products() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, fallbackProducts]);
+  }, [fallbackProducts]);
 
   const productsPerView = isMdUp ? 4 : isSmUp ? 2 : 1;
   const maxStartIndex = Math.max(0, products.length - productsPerView);
@@ -313,11 +364,13 @@ export default function Products() {
             </Box>
 
             <IconButton
+              onClick={() => setMobileMenuOpen(true)}
               sx={{
                 display: { xs: "flex", md: "none" },
                 color: "white",
                 ml: "auto",
               }}
+              aria-label="Open mobile menu"
             >
               <MenuIcon />
             </IconButton>
@@ -394,6 +447,30 @@ export default function Products() {
                       </Badge>
                     </IconButton>
 
+                    <Button
+                      onClick={() => setCheckoutDialogOpen(true)}
+                      variant="contained"
+                      sx={{
+                        display: { xs: "none", sm: "inline-flex" },
+                        color: "#fff",
+                        textTransform: "none",
+                        fontWeight: 600,
+                        borderRadius: 3,
+                        px: { xs: 1, sm: 2 },
+                        py: 0.8,
+                        mr: 1,
+                        bgcolor: "rgba(76, 175, 80, 0.85)",
+                        transition: "transform 180ms ease, background-color 220ms ease",
+                        "&:hover": {
+                          bgcolor: "rgba(76, 175, 80, 1)",
+                          transform: "translateY(-1px)",
+                        },
+                        "&:active": { transform: "translateY(0px) scale(0.98)" },
+                      }}
+                    >
+                      Checkout
+                    </Button>
+
                     <IconButton
                       onClick={openProfileMenu}
                       sx={{ p: 0, ml: { xs: 1, md: 0 } }}
@@ -421,10 +498,17 @@ export default function Products() {
 
                     {/* USE NEW CART DIALOG COMPONENT */}
                     {adminChecked && !isAdmin && (
-                      <CartDialog
-                        open={cartOpen}
-                        onClose={() => setCartOpen(false)}
-                      />
+                      <>
+                        <CartDialog
+                          open={cartOpen}
+                          onClose={() => setCartOpen(false)}
+                          onCheckout={() => setCheckoutDialogOpen(true)}
+                        />
+                        <CheckoutDialog
+                          open={checkoutDialogOpen}
+                          onClose={() => setCheckoutDialogOpen(false)}
+                        />
+                      </>
                     )}
                   </>
                 )}
@@ -433,6 +517,102 @@ export default function Products() {
           </Toolbar>
         </Container>
       </AppBar>
+
+      {/* MOBILE NAVIGATION DRAWER */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            bgcolor: "rgba(17, 17, 17, 0.98)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            width: 280,
+            bgcolor: "rgba(17, 17, 17, 0.98)",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Box sx={{ p: 2, borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+            <TextField placeholder="Search navigation..." disabled fullWidth size="small" />
+          </Box>
+          <List sx={{ flex: 1, overflowY: "auto" }}>
+            {getNavItems(isAdmin).map((item) => {
+              const to = getNavTo(item);
+              const isActive = isNavItemActive(item, location.pathname);
+              return (
+                <ListItemButton
+                  key={item}
+                  component={RouterLink}
+                  to={to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  sx={{
+                    color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
+                    bgcolor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                    pl: 2,
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.08)",
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  <ListItemText primary={item} />
+                </ListItemButton>
+              );
+            })}
+          </List>
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
+          <Box sx={{ p: 2 }}>
+            {!currentUser ? (
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                fullWidth
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{
+                  bgcolor: "rgba(76, 175, 80, 0.85)",
+                  color: "#fff",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "rgba(76, 175, 80, 1)" },
+                }}
+              >
+                Login
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  color: "#fff",
+                  borderColor: "rgba(255,255,255,0.5)",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  "&:hover": {
+                    borderColor: "#fff",
+                    bgcolor: "rgba(255,255,255,0.1)",
+                  },
+                }}
+              >
+                Logout
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Drawer>
 
       <Box
         sx={{
@@ -470,6 +650,37 @@ export default function Products() {
 
             {loadingProducts ? (
               <ThemedLoadingSpinner />
+            ) : products.length === 0 ? (
+              <Box
+                sx={{
+                  mt: 4,
+                  p: { xs: 3, md: 4 },
+                  borderRadius: 4,
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  backgroundColor: "rgba(0,0,0,0.22)",
+                  backdropFilter: "blur(8px)",
+                  textAlign: "center",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: "rgba(255,255,255,0.7)",
+                    fontWeight: 600,
+                    mb: 1,
+                  }}
+                >
+                  No Products Available
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "rgba(255,255,255,0.5)",
+                  }}
+                >
+                  We'll have new products coming soon. Please check back later.
+                </Typography>
+              </Box>
             ) : (
               <Box
                 sx={{

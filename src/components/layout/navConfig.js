@@ -26,6 +26,7 @@ export const adminNavItems = [
   "Khidmat e Khalq",
   "Mureed's Requests",
   "View Appointment",
+  "Orders",
 ];
 
 // For backward compatibility
@@ -42,6 +43,7 @@ export const routeByItem = {
   "Mureed's Requests": "/admin/mureed-requests",
   Appointment: "/appointment",
   "View Appointment": "/admin/appointments",
+  Orders: "/admin/orders",
 };
 
 export function getNavItems(isAdmin, isLoggedIn) {

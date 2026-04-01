@@ -597,23 +597,21 @@ export default function Appointment() {
           <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)" }}>
             Bank Name
           </Typography>
-          <Typography fontWeight={600}>Meezan Bank</Typography>
+          <Typography fontWeight={600}>HBL</Typography>
         </Box>
 
         <Box>
           <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)" }}>
             Account Title
           </Typography>
-          <Typography fontWeight={600}>Dr. Shariq Tariqi</Typography>
+          <Typography fontWeight={600}>Muhammad Shariq</Typography>
         </Box>
 
         <Box>
           <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)" }}>
-            Account Number
+            Branch Name
           </Typography>
-          <Typography fontWeight={700} fontSize={17} letterSpacing={1}>
-            0123-4567-8901-2345
-          </Typography>
+          <Typography fontWeight={600}>Bara Market Branch</Typography>
         </Box>
 
         <Box>
@@ -621,7 +619,7 @@ export default function Appointment() {
             IBAN
           </Typography>
           <Typography fontWeight={600} fontSize={14}>
-            PK12 MEZN 0001 2345 6789 0123
+            PK25 HABB 00244070000008303
           </Typography>
         </Box>
       </Box>

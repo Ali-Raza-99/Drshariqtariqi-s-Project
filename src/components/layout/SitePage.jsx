@@ -9,7 +9,12 @@ import {
 	CssBaseline,
 	Dialog,
 	Divider,
+	Drawer,
 	IconButton,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemText,
 	Menu,
 	MenuItem,
 	Slide,
@@ -34,6 +39,7 @@ import powderImg from "../../assets/powder.jpeg";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile } from "../../firebase/firestore";
 import { getNavItems, getNavTo, isNavItemActive } from "./navConfig";
+import SocialMediaIcons from "../SocialMediaIcons";
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
@@ -52,6 +58,7 @@ export default function SitePage({ children, maxWidth = "md" }) {
 	const isProfileMenuOpen = Boolean(profileMenuAnchorEl);
 
 	const [cartOpen, setCartOpen] = useState(false);
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
 	const cartProducts = useMemo(
 		() => [
@@ -184,7 +191,10 @@ export default function SitePage({ children, maxWidth = "md" }) {
 											fontWeight: 600,
 											textTransform: "none",
 											borderRadius: 2,
-											px: 1.25,
+											px: { xs: 0.75, md: 1.25 },
+											py: { xs: 0.5, md: 0.75 },
+											fontSize: { xs: "0.8rem", md: "0.95rem" },
+											whiteSpace: "nowrap",
 											...(isActive
 												? {
 													backgroundColor: "rgba(255,255,255,0.08)",
@@ -203,11 +213,13 @@ export default function SitePage({ children, maxWidth = "md" }) {
 						</Box>
 
 						<IconButton
+							onClick={() => setMobileMenuOpen(true)}
 							sx={{
 								display: { xs: "flex", md: "none" },
 								color: "white",
 								ml: "auto",
 							}}
+							aria-label="Open mobile menu"
 						>
 							<MenuIcon />
 						</IconButton>
@@ -225,8 +237,9 @@ export default function SitePage({ children, maxWidth = "md" }) {
 											textTransform: "none",
 											fontWeight: 600,
 											borderRadius: 4,
-											px: 2,
-											py: 0.8,
+											px: { xs: 1.5, md: 2 },
+											py: { xs: 0.6, md: 0.8 },
+											fontSize: { xs: "0.75rem", md: "0.875rem" },
 											transition:
 												"transform 180ms ease, background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease",
 											boxShadow: "0 10px 24px rgba(0,0,0,0.25)",
@@ -523,12 +536,107 @@ export default function SitePage({ children, maxWidth = "md" }) {
 				</Container>
 			</AppBar>
 
+			{/* MOBILE NAVIGATION DRAWER */}
+			<Drawer
+				anchor="left"
+				open={mobileMenuOpen}
+				onClose={() => setMobileMenuOpen(false)}
+				sx={{
+					"& .MuiDrawer-paper": {
+						bgcolor: "rgba(17, 17, 17, 0.98)",
+						backdropFilter: "blur(10px)",
+						border: "1px solid rgba(255,255,255,0.1)",
+					},
+				}}
+			>
+				<Box
+					sx={{
+						width: 280,
+						bgcolor: "rgba(17, 17, 17, 0.98)",
+						height: "100%",
+						display: "flex",
+						flexDirection: "column",
+					}}
+				>
+					<List sx={{ flex: 1, overflowY: "auto" }}>
+						{getNavItems(isAdmin, !!currentUser).map((item) => {
+							const to = getNavTo(item);
+							const isActive = isNavItemActive(item, location.pathname);
+							return (
+								<ListItemButton
+									key={item}
+									component={RouterLink}
+									to={to}
+									onClick={() => setMobileMenuOpen(false)}
+									sx={{
+										color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
+										bgcolor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+										borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+										pl: 2,
+										"&:hover": {
+											bgcolor: "rgba(255,255,255,0.08)",
+											color: "#fff",
+										},
+									}}
+								>
+									<ListItemText primary={item} />
+								</ListItemButton>
+							);
+						})}
+					</List>
+					<Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
+					<Box sx={{ p: 2 }}>
+						{!currentUser ? (
+							<Button
+								component={RouterLink}
+								to="/login"
+								variant="contained"
+								fullWidth
+								onClick={() => setMobileMenuOpen(false)}
+								sx={{
+									bgcolor: "rgba(76, 175, 80, 0.85)",
+									color: "#fff",
+									fontWeight: 600,
+									textTransform: "none",
+									"&:hover": { bgcolor: "rgba(76, 175, 80, 1)" },
+								}}
+							>
+								Login
+							</Button>
+						) : (
+							<Button
+								onClick={() => {
+									logout();
+									setMobileMenuOpen(false);
+								}}
+								variant="outlined"
+								fullWidth
+								sx={{
+									color: "#fff",
+									borderColor: "rgba(255,255,255,0.5)",
+									textTransform: "none",
+									fontWeight: 600,
+									"&:hover": {
+										borderColor: "#fff",
+										bgcolor: "rgba(255,255,255,0.1)",
+									},
+								}}
+							>
+								Logout
+							</Button>
+						)}
+					</Box>
+				</Box>
+			</Drawer>
+
 		<Box 
+			className="site-page-wrapper"
 			sx={{ 
 				minHeight: "100vh", 
 				bgcolor: "#000", 
 				color: "#fff", 
 				pt: { xs: 10, md: 12 },
+				pb: { xs: 14, md: 16 },
 				backgroundColor: "#fff",
 				backgroundImage: `url(${bgImg})`,
 				backgroundSize: "cover",
@@ -540,6 +648,7 @@ export default function SitePage({ children, maxWidth = "md" }) {
 			<Container maxWidth={maxWidth}>{children}</Container>
 
 			<Footer />
+			<SocialMediaIcons />
 		</Box>
 	</>
 );

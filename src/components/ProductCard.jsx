@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import {
   Box,
   Card,
@@ -16,6 +16,41 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import LoginFirstDialog from "./auth/LoginFirstDialog";
 
+// Stateless guard to prevent double execution
+class ClickGuard {
+  constructor() {
+    this.isProcessing = false;
+    this.lastExecutedQty = null;
+    this.minWaitMs = 500;
+    this.lastExecuteTime = 0;
+  }
+
+  canExecute(targetQty) {
+    const now = Date.now();
+    const timeSinceLastExecute = now - this.lastExecuteTime;
+
+    if (this.isProcessing) return false;
+    if (timeSinceLastExecute < this.minWaitMs) return false;
+    if (this.lastExecutedQty === targetQty) return false;
+
+    return true;
+  }
+
+  execute(targetQty) {
+    this.isProcessing = true;
+    this.lastExecuteTime = Date.now();
+    this.lastExecutedQty = targetQty;
+  }
+
+  complete() {
+    this.isProcessing = false;
+  }
+
+  reset() {
+    this.isProcessing = false;
+  }
+}
+
 export default function ProductCard({
   image,
   name,
@@ -28,6 +63,12 @@ export default function ProductCard({
   const { currentUser } = useAuth();
   const { cartItems, updateQuantity, addToCart } = useCart();
   const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Use single guard instance for all protection
+  const guardRef = useRef(new ClickGuard());
+  const currentQuantityRef = useRef(0);
+  const cartItemIdRef = useRef(null);
 
   // Get current quantity from cart for this product
   const currentQuantity = useMemo(() => {
@@ -41,44 +82,102 @@ export default function ProductCard({
     return cartItem?.id;
   }, [cartItems, id]);
 
-  const requireLoginOr = (fn) => {
-    if (!currentUser) {
-      setLoginPromptOpen(true);
-      return;
-    }
-    fn?.();
-  };
+  // Sync refs with computed values whenever they change
+  useEffect(() => {
+    currentQuantityRef.current = currentQuantity;
+    cartItemIdRef.current = cartItemId;
+  }, [currentQuantity, cartItemId]);
 
-  const handleIncreaseQty = async () => {
-    requireLoginOr(async () => {
+  const handleIncreaseQty = useCallback(
+    async (e) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+
+      const guard = guardRef.current;
+      const currentQty = currentQuantityRef.current;
+      const targetQty = currentQty === 0 ? 1 : currentQty + 1;
+
+      // Single comprehensive guard
+      if (!guard.canExecute(targetQty)) {
+        console.log(
+          ` Click blocked: isProcessing=${guard.isProcessing}, lastQty=${guard.lastExecutedQty}, target=${targetQty}`
+        );
+        return;
+      }
+
+      if (!currentUser) {
+        setLoginPromptOpen(true);
+        return;
+      }
+
+      guard.execute(targetQty);
+      setIsUpdating(true);
+
       try {
-        if (currentQuantity === 0) {
-          // Add to cart if not exists
+        console.log(`✅ Executing increase: ${currentQty} → ${targetQty}`);
+        const itemId = cartItemIdRef.current;
+
+        if (currentQty === 0) {
           await addToCart({ id, name, price, image });
         } else {
-          // Increase quantity
-          await updateQuantity(cartItemId, currentQuantity + 1);
+          await updateQuantity(itemId, targetQty);
         }
+
         onIncreaseQty?.();
       } catch (err) {
-        console.error("Error updating quantity:", err);
+        console.error("❌ Error:", err);
+        guard.reset();
+      } finally {
+        guard.complete();
+        setIsUpdating(false);
       }
-    });
-  };
+    },
+    [currentUser, id, name, price, image, addToCart, updateQuantity, onIncreaseQty]
+  );
 
-  const handleDecreaseQty = async () => {
-    requireLoginOr(async () => {
+  const handleDecreaseQty = useCallback(
+    async (e) => {
+      e?.preventDefault();
+      e?.stopPropagation();
+
+      const guard = guardRef.current;
+      const currentQty = currentQuantityRef.current;
+      const targetQty = Math.max(0, currentQty - 1);
+
+      // Single comprehensive guard
+      if (!guard.canExecute(targetQty)) {
+        console.log(
+          `🚫 Click blocked: isProcessing=${guard.isProcessing}, lastQty=${guard.lastExecutedQty}, target=${targetQty}`
+        );
+        return;
+      }
+
+      if (!currentUser) {
+        setLoginPromptOpen(true);
+        return;
+      }
+
+      guard.execute(targetQty);
+      setIsUpdating(true);
+
       try {
-        if (currentQuantity > 0) {
-          // Decrease quantity (can go to 0)
-          await updateQuantity(cartItemId, Math.max(0, currentQuantity - 1));
+        console.log(`✅ Executing decrease: ${currentQty} → ${targetQty}`);
+
+        if (currentQty > 0) {
+          const itemId = cartItemIdRef.current;
+          await updateQuantity(itemId, targetQty);
           onDecreaseQty?.();
         }
       } catch (err) {
-        console.error("Error updating quantity:", err);
+        console.error("❌ Error:", err);
+        guard.reset();
+      } finally {
+        guard.complete();
+        setIsUpdating(false);
       }
-    });
-  };
+    },
+    [currentUser, id, updateQuantity, onDecreaseQty]
+  );
 
   return (
     <Card
@@ -203,12 +302,14 @@ export default function ProductCard({
       <Stack direction="row" alignItems="center" spacing={1} mt={1.5}>
         <IconButton
           onClick={handleDecreaseQty}
+          disabled={isUpdating || currentQuantity <= 0}
           disableRipple
           sx={{
             color: "white",
             border: "1px solid rgba(255,255,255,0.35)",
             bgcolor: "transparent",
             "&:hover": { bgcolor: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.65)" },
+            "&:disabled": { opacity: 0.5, cursor: "not-allowed" },
           }}
         >
           <RemoveIcon />
@@ -231,12 +332,14 @@ export default function ProductCard({
 
         <IconButton
           onClick={handleIncreaseQty}
+          disabled={isUpdating}
           disableRipple
           sx={{
             color: "white",
             border: "1px solid rgba(255,255,255,0.35)",
             bgcolor: "transparent",
             "&:hover": { bgcolor: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.65)" },
+            "&:disabled": { opacity: 0.5, cursor: "not-allowed" },
           }}
         >
           <AddIcon />
@@ -246,6 +349,8 @@ export default function ProductCard({
       {/* ACTION BUTTON */}
       <Button
         fullWidth
+        type="button"
+        disabled={isUpdating}
         disableRipple
         onClick={handleIncreaseQty}
         sx={{
@@ -256,7 +361,8 @@ export default function ProductCard({
           textTransform: "none",
           py: 1,
           mt: 1.5,
-          "&:hover": { bgcolor: "#eee" },
+          "&:hover": { bgcolor: "#eee", opacity: 1 },
+          "&:disabled": { opacity: 0.6, bgcolor: "#ccc", cursor: "not-allowed" },
         }}
       >
         {currentQuantity > 0 ? "Update Cart" : "Add to Cart"}

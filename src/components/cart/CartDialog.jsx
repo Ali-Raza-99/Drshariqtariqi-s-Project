@@ -20,6 +20,7 @@ import { useCart } from "../../context/CartContext";
 export default function CartDialog({
   open,
   onClose,
+  onCheckout,
 }) {
   const {
     cartItems,
@@ -29,48 +30,33 @@ export default function CartDialog({
     cartError,
     updateQuantity,
     removeItem,
-    checkout,
   } = useCart();
 
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [checkoutError, setCheckoutError] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
 
   const handleUpdateQuantity = async (cartItemId, newQuantity) => {
     try {
-      setCheckoutError(null);
+      setUpdateError(null);
       await updateQuantity(cartItemId, newQuantity);
     } catch (err) {
-      setCheckoutError(err.message);
+      setUpdateError(err.message);
     }
   };
 
   const handleRemoveItem = async (cartItemId) => {
     try {
-      setCheckoutError(null);
+      setUpdateError(null);
       await removeItem(cartItemId);
     } catch (err) {
-      setCheckoutError(err.message);
+      setUpdateError(err.message);
     }
   };
 
-  const handleCheckout = async () => {
-    try {
-      setCheckoutError(null);
-      setIsCheckingOut(true);
-      
-      // For now, just place the order. Later you can add delivery address, etc.
-      await checkout({
-        deliveryAddress: "", // Can be collected in a form
-        notes: "",
-      });
-
-      // Close dialog after successful checkout
-      onClose();
-      alert("Order placed successfully!");
-    } catch (err) {
-      setCheckoutError(err.message);
-    } finally {
-      setIsCheckingOut(false);
+  const handleCheckoutClick = () => {
+    onClose();
+    if (onCheckout) {
+      onCheckout();
     }
   };
   return (
@@ -255,9 +241,9 @@ export default function CartDialog({
                 <Typography variant="h6" fontWeight={1000} sx={{ lineHeight: 1.1, mb: 1 }}>
                   Rs. {totalAmount}
                 </Typography>
-                {checkoutError && (
+                {updateError && (
                   <Alert severity="error" sx={{ mb: 1, fontSize: 11 }}>
-                    {checkoutError}
+                    {updateError}
                   </Alert>
                 )}
                 <Button
@@ -282,14 +268,10 @@ export default function CartDialog({
                       bgcolor: '#f5f5f5',
                     },
                   }}
-                  disabled={cartItems.filter(item => (item.quantity ?? 0) > 0).length === 0 || isCheckingOut}
-                  onClick={handleCheckout}
+                  disabled={cartItems.filter(item => (item.quantity ?? 0) > 0).length === 0}
+                  onClick={handleCheckoutClick}
                 >
-                  {isCheckingOut ? (
-                    <CircularProgress size={18} sx={{ color: "#222", mr: 1 }} />
-                  ) : (
-                    "Checkout"
-                  )}
+                  Checkout
                 </Button>
               </Box>
             </Box>

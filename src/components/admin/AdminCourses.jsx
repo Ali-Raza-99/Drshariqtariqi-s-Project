@@ -9,8 +9,13 @@ import {
   Dialog,
   DialogContent,
   Divider,
+  Drawer,
   Grid,
   IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
   Menu,
   MenuItem,
   TextField,
@@ -53,6 +58,7 @@ export default function AdminCourses() {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminChecked, setAdminChecked] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const fallbackCourses = useMemo(() => [], []);
 
@@ -387,11 +393,13 @@ export default function AdminCourses() {
             </Box>
 
             <IconButton
+              onClick={() => setMobileMenuOpen(true)}
               sx={{
                 display: { xs: "flex", md: "none" },
                 color: "white",
                 ml: "auto",
               }}
+              aria-label="Open mobile menu"
             >
               <MenuIcon />
             </IconButton>
@@ -468,12 +476,106 @@ export default function AdminCourses() {
         </Container>
       </AppBar>
 
+      {/* MOBILE NAVIGATION DRAWER */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            bgcolor: "rgba(17, 17, 17, 0.98)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            width: 280,
+            bgcolor: "rgba(17, 17, 17, 0.98)",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <List sx={{ flex: 1, overflowY: "auto" }}>
+            {getNavItems(isAdmin).map((item) => {
+              const to = getNavTo(item);
+              const isActive = isNavItemActive(item, location.pathname);
+              return (
+                <ListItemButton
+                  key={item}
+                  component={RouterLink}
+                  to={to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  sx={{
+                    color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
+                    bgcolor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+                    borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+                    pl: 2,
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.08)",
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  <ListItemText primary={item} />
+                </ListItemButton>
+              );
+            })}
+          </List>
+          <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
+          <Box sx={{ p: 2 }}>
+            {!currentUser ? (
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                fullWidth
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{
+                  bgcolor: "rgba(76, 175, 80, 0.85)",
+                  color: "#fff",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "rgba(76, 175, 80, 1)" },
+                }}
+              >
+                Login
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                variant="outlined"
+                fullWidth
+                sx={{
+                  color: "#fff",
+                  borderColor: "rgba(255,255,255,0.5)",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  "&:hover": {
+                    borderColor: "#fff",
+                    bgcolor: "rgba(255,255,255,0.1)",
+                  },
+                }}
+              >
+                Logout
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Drawer>
+
       <Box
+        className="footer-spacing"
         sx={{
           minHeight: "100vh",
           color: "#fff",
           pt: { xs: 8, md: 10 },
-          pb: 8,
+          pb: { xs: 14, md: 16 },
           backgroundColor: "#fff",
           backgroundImage: `url(${bgImg})`,
           backgroundSize: "cover",
@@ -513,8 +615,8 @@ export default function AdminCourses() {
                 backdropFilter: "blur(12px)",
               }}
             >
-              <Grid size={12} container spacing={3}>
-                <Grid size={3} item xs={12} sm={6} md={3}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Course Name"
                     fullWidth
@@ -545,7 +647,7 @@ export default function AdminCourses() {
                   />
                 </Grid>
 
-                <Grid size={2} item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3}>
                   <TextField
                     label="Price (Rs.)"
                     fullWidth
@@ -578,7 +680,7 @@ export default function AdminCourses() {
                   />
                 </Grid>
 
-                <Grid size={3} item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3}>
                   <Button
                     component="label"
                     fullWidth
@@ -626,7 +728,7 @@ export default function AdminCourses() {
                   </Grid>
                 )}
 
-                <Grid size={4} item xs={12} sm={6} md={5}>
+                <Grid item xs={12} sm={6} md={3}>
                   <Button
                     variant="contained"
                     onClick={handleAdminSave}

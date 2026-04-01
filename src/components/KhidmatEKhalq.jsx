@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
 	AppBar,
 	Avatar,
@@ -9,13 +9,19 @@ import {
 	CssBaseline,
 	Dialog,
 	Divider,
+	Drawer,
 	IconButton,
+	List,
+	ListItemButton,
+	ListItemText,
 	Menu,
 	MenuItem,
 	Slide,
 	Stack,
 	Toolbar,
 	Typography,
+	CircularProgress,
+	Alert,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -28,33 +34,70 @@ import SocialMediaIcons from "./SocialMediaIcons";
 import Footer from "./layout/Footer";
 
 import logoImg from "../assets/logo.jpeg";
-import amliyatImg from "../assets/amliyat.jpg";
 import oilImg from "../assets/oil.jpeg";
 import bakhorImg from "../assets/bakhor.jpeg";
 import powderImg from "../assets/powder.jpeg";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { getUserProfile } from "../firebase/firestore";
-import { getNavTo, isNavItemActive, navItems } from "./layout/navConfig";
+import { getNavTo, getNavItems, isNavItemActive, navItems } from "./layout/navConfig";
 import slide5Img from "../assets/5.png";
+
+// Default content structure
+const DEFAULT_CONTENT = {
+	title: "Khidmat e Khalq",
+	description:
+		"Khidmat e Khalq, which translates to 'Service to Humanity,' is a noble initiative dedicated to serving the community and helping those in need. This program embodies the spirit of compassion, generosity, and selfless service, following the teachings of Islam to care for and support our fellow human beings.",
+	sections: [
+		{
+			id: "mission",
+			heading: "Our Mission",
+			content:
+				"Through Khidmat e Khalq, we strive to provide essential support and assistance to underprivileged members of our community. Our mission is to spread kindness, offer relief to those facing hardships, and create a positive impact in society through various charitable activities and welfare programs.",
+		},
+		{
+			id: "activities",
+			heading: "What We Do",
+			items: [
+				"Provide food and essential supplies to families in need",
+				"Organize community welfare programs and charitable events",
+				"Offer support during religious occasions and community gatherings",
+				"Facilitate educational and spiritual guidance initiatives",
+			],
+		},
+		{
+			id: "involvement",
+			heading: "Get Involved",
+			content:
+				"We welcome everyone who wishes to contribute to this noble cause. Whether through donations, volunteering, or spreading awareness, every effort makes a difference in transforming lives and building a stronger, more compassionate community.",
+		},
+	],
+};
 
 const CartTransition = React.forwardRef(function CartTransition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function IjmiatiQurbani() {
-	// ...existing code...
+export default function KhidmatEKhalq() {
 	const { currentUser, authLoading, logout } = useAuth();
+	const { cartItems, addToCart, removeFromCart, updateQuantity } = useCart();
 	const location = useLocation();
 
+	// State management
 	const [profilePicUrl, setProfilePicUrl] = useState(null);
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [adminChecked, setAdminChecked] = useState(false);
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [profileMenuAnchorEl, setProfileMenuAnchorEl] = useState(null);
+	const [cartOpen, setCartOpen] = useState(false);
+	const [pageContent, setPageContent] = useState(DEFAULT_CONTENT);
+	const [contentLoading, setContentLoading] = useState(false);
+	const [contentError, setContentError] = useState(null);
+
 	const isProfileMenuOpen = Boolean(profileMenuAnchorEl);
 
-	const [cartOpen, setCartOpen] = useState(false);
-
-	const cartProducts = useMemo(
+	// Static products for this page
+	const pageProducts = useMemo(
 		() => [
 			{ id: "oil", name: "Oil", price: 1200, image: oilImg },
 			{ id: "bakhor", name: "Bakhor", price: 1500, image: bakhorImg },
@@ -63,20 +106,9 @@ export default function IjmiatiQurbani() {
 		[]
 	);
 
-	const [cartQty, setCartQty] = useState(() => ({ oil: 0, bakhor: 0, powder: 0 }));
-	const totalItems = cartProducts.reduce((sum, p) => sum + (cartQty[p.id] ?? 0), 0);
-	const totalAmount = cartProducts.reduce(
-		(sum, p) => sum + (cartQty[p.id] ?? 0) * p.price,
-		0
-	);
-
-	const incCart = (id) =>
-		setCartQty((prev) => ({ ...prev, [id]: Math.min(99, (prev[id] ?? 0) + 1) }));
-	const decCart = (id) =>
-		setCartQty((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 0) - 1) }));
-
+	// Load user profile
 	useEffect(() => {
-		let cancelled = false;
+		let isMounted = true;
 
 		const loadProfile = async () => {
 			if (!currentUser?.uid) {
@@ -88,19 +120,22 @@ export default function IjmiatiQurbani() {
 
 			try {
 				const profile = await getUserProfile(currentUser.uid);
-				if (cancelled) return;
+				if (!isMounted) return;
 
-				const fromFirestore =
+				const profilePic =
 					profile?.profilePicture ??
 					profile?.photoURL ??
 					profile?.profilePicUrl ??
 					profile?.avatarUrl ??
+					currentUser.photoURL ??
 					null;
-				setProfilePicUrl(fromFirestore ?? currentUser.photoURL ?? null);
+
+				setProfilePicUrl(profilePic);
 				setIsAdmin(profile?.role === "admin");
 				setAdminChecked(true);
-			} catch {
-				if (cancelled) return;
+			} catch (err) {
+				if (!isMounted) return;
+				console.error("Error loading profile:", err);
 				setProfilePicUrl(currentUser.photoURL ?? null);
 				setIsAdmin(false);
 				setAdminChecked(true);
@@ -109,20 +144,79 @@ export default function IjmiatiQurbani() {
 
 		loadProfile();
 		return () => {
-			cancelled = true;
+			isMounted = false;
 		};
 	}, [currentUser?.uid, currentUser?.photoURL]);
 
+	// Load page content (can be from Firestore later)
 	useEffect(() => {
-		if (isAdmin) setCartOpen(false);
-	}, [isAdmin]);
+		const loadContent = async () => {
+			setContentLoading(true);
+			setContentError(null);
+			try {
+				// TODO: Replace with Firestore fetch when content collection is created
+				// const content = await getKhidmatContent();
+				// setPageContent(content);
+				setPageContent(DEFAULT_CONTENT);
+				setContentLoading(false);
+			} catch (err) {
+				console.error("Error loading page content:", err);
+				setContentError("Failed to load page content");
+				setPageContent(DEFAULT_CONTENT);
+				setContentLoading(false);
+			}
+		};
 
-	const openProfileMenu = (event) => setProfileMenuAnchorEl(event.currentTarget);
-	const closeProfileMenu = () => setProfileMenuAnchorEl(null);
-	const handleLogout = async () => {
+		loadContent();
+	}, []);
+
+	// Profile menu handlers
+	const openProfileMenu = useCallback(
+		(event) => setProfileMenuAnchorEl(event.currentTarget),
+		[]
+	);
+	const closeProfileMenu = useCallback(() => setProfileMenuAnchorEl(null), []);
+
+	const handleLogout = useCallback(async () => {
 		closeProfileMenu();
-		await logout();
-	};
+		try {
+			await logout();
+		} catch (err) {
+			console.error("Logout error:", err);
+		}
+	}, [logout, closeProfileMenu]);
+
+	// Get cart items from global context that match this page's products
+	const pageCartItems = useMemo(() => {
+		return pageProducts.map((product) => {
+			const cartItem = cartItems.find((item) => item.id === product.id);
+			return {
+				...product,
+				quantity: cartItem?.quantity ?? 0,
+			};
+		});
+	}, [pageProducts, cartItems]);
+
+	const totalItems = pageCartItems.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+	const totalAmount = pageCartItems.reduce(
+		(sum, item) => sum + (item.quantity ?? 0) * item.price,
+		0
+	);
+
+	const incCart = (id) => updateQuantity(id, (cartItems.find((i) => i.id === id)?.quantity ?? 0) + 1);
+	const decCart = (id) => updateQuantity(id, Math.max(0, (cartItems.find((i) => i.id === id)?.quantity ?? 0) - 1));
+
+	if (authLoading || !adminChecked) {
+		return <CircularProgress />;
+	}
+
+	if (isAdmin) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+				<Typography>Admins cannot access this page.</Typography>
+			</Box>
+		);
+	}
 
 	return (
 		<>
@@ -205,11 +299,13 @@ export default function IjmiatiQurbani() {
 						</Box>
 
 						<IconButton
+							onClick={() => setMobileMenuOpen(true)}
 							sx={{
 								display: { xs: "flex", md: "none" },
 								color: "white",
 								ml: "auto",
 							}}
+							aria-label="Open mobile menu"
 						>
 							<MenuIcon />
 						</IconButton>
@@ -373,8 +469,8 @@ export default function IjmiatiQurbani() {
 
 													<Box sx={{ px: 2.25, py: 2 }}>
 														<Stack spacing={1.5}>
-															{cartProducts.map((p) => {
-																const qty = cartQty[p.id] ?? 0;
+														{pageProducts.map((p) => {
+															const qty = pageCartItems.find(item => item.id === p.id)?.quantity ?? 0;
 																const lineTotal = qty * p.price;
 																return (
 																	<Box
@@ -492,15 +588,15 @@ export default function IjmiatiQurbani() {
 																</Typography>
 															) : (
 																<Stack spacing={0.4}>
-																	{cartProducts
-																		.filter((p) => (cartQty[p.id] ?? 0) > 0)
+																	{pageCartItems
+																		.filter((p) => (p.quantity ?? 0) > 0)
 																		.map((p) => (
 																			<Typography
 																				key={`summary-${p.id}`}
 																				variant="body2"
 																				sx={{ opacity: 0.85, fontSize: 13 }}
 																			>
-																				{p.name} × {cartQty[p.id]} = Rs. {(cartQty[p.id] ?? 0) * p.price}
+																				{p.name} × {p.quantity} = Rs. {(p.quantity ?? 0) * p.price}
 																			</Typography>
 																		))}
 																</Stack>
@@ -526,6 +622,99 @@ export default function IjmiatiQurbani() {
 					</Toolbar>
 				</Container>
 			</AppBar>
+
+			{/* MOBILE NAVIGATION DRAWER */}
+			<Drawer
+				anchor="left"
+				open={mobileMenuOpen}
+				onClose={() => setMobileMenuOpen(false)}
+				sx={{
+					"& .MuiDrawer-paper": {
+						bgcolor: "rgba(17, 17, 17, 0.98)",
+						backdropFilter: "blur(10px)",
+						border: "1px solid rgba(255,255,255,0.1)",
+					},
+				}}
+			>
+				<Box
+					sx={{
+						width: 280,
+						bgcolor: "rgba(17, 17, 17, 0.98)",
+						height: "100%",
+						display: "flex",
+						flexDirection: "column",
+					}}
+				>
+					<List sx={{ flex: 1, overflowY: "auto" }}>
+					{getNavItems(isAdmin, currentUser !== null).map((item) => {
+							const to = getNavTo(item);
+							const isActive = isNavItemActive(item, location.pathname);
+							return (
+								<ListItemButton
+									key={item}
+									component={RouterLink}
+									to={to}
+									onClick={() => setMobileMenuOpen(false)}
+									sx={{
+										color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
+										bgcolor: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+										borderLeft: isActive ? "3px solid #fff" : "3px solid transparent",
+										pl: 2,
+										"&:hover": {
+											bgcolor: "rgba(255,255,255,0.08)",
+											color: "#fff",
+										},
+									}}
+								>
+									<ListItemText primary={item} />
+								</ListItemButton>
+							);
+						})}
+					</List>
+					<Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
+					<Box sx={{ p: 2 }}>
+						{!currentUser ? (
+							<Button
+								component={RouterLink}
+								to="/login"
+								variant="contained"
+								fullWidth
+								onClick={() => setMobileMenuOpen(false)}
+								sx={{
+									bgcolor: "rgba(76, 175, 80, 0.85)",
+									color: "#fff",
+									fontWeight: 600,
+									textTransform: "none",
+									"&:hover": { bgcolor: "rgba(76, 175, 80, 1)" },
+								}}
+							>
+								Login
+							</Button>
+						) : (
+							<Button
+								onClick={() => {
+									handleLogout();
+									setMobileMenuOpen(false);
+								}}
+								variant="outlined"
+								fullWidth
+								sx={{
+									color: "#fff",
+									borderColor: "rgba(255,255,255,0.5)",
+									textTransform: "none",
+									fontWeight: 600,
+									"&:hover": {
+										borderColor: "#fff",
+										bgcolor: "rgba(255,255,255,0.1)",
+									},
+								}}
+							>
+								Logout
+							</Button>
+						)}
+					</Box>
+				</Box>
+			</Drawer>
 
 			{/* PAGE CONTENT */}
 			<Box

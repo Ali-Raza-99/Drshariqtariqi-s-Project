@@ -125,7 +125,7 @@ function MureedCounter() {
       <Box sx={{ width: '100%', pt: { xs: 4, md: 6 } }}>
          <Typography
            variant="h3"
-           sx={{ textAlign: 'center', color: '#fff', mb: 1, fontWeight: 900 }}
+           sx={{ textAlign: 'center', color: '#fff', mb: { xs: 3, md: 4 }, fontWeight: 900 }}
          >
            Mureed Registry
          </Typography>
@@ -133,10 +133,11 @@ function MureedCounter() {
           sx={{
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '80vh',
+            alignItems: 'flex-start',
+            minHeight: 'auto',
             background: 'none',
             width: '100%',
+            py: { xs: 2, md: 3 },
           }}
         >
           <Box
