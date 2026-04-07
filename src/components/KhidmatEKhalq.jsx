@@ -210,14 +210,6 @@ export default function KhidmatEKhalq() {
 		return <CircularProgress />;
 	}
 
-	if (isAdmin) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
-				<Typography>Admins cannot access this page.</Typography>
-			</Box>
-		);
-	}
-
 	return (
 		<>
 			<CssBaseline />
